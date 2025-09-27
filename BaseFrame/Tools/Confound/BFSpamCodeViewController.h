@@ -1,0 +1,16 @@
+//
+//  BFSpamCodeViewController.h
+//  OCProject
+//
+//  Created by 王祥伟 on 2024/3/22.
+//
+
+#import "BFBaseTableViewController.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface BFSpamCodeViewController : BFBaseTableViewController
+
+@end
+
+NS_ASSUME_NONNULL_END

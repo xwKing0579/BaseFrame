@@ -1,0 +1,74 @@
+//
+//  PrefixHeader.pch
+//  BaseFrame
+//
+//  Created by 王祥伟 on 2024/7/30.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+#ifdef __OBJC__
+#import "BFRouter.h"
+#import "BFString.h"
+#import "BFNetworkManager.h"
+#import "BFToastManager.h"
+
+#import "BFNetworkManager+Envi.h"
+#import "BFUserDefaults.h"
+
+#import "UIImage+Assets.h"
+#import "NSObject+Mediator.h"
+#import "NSArray+Catagory.h"
+#import "BFString+Debug.h"
+#import "UIButton+Category.h"
+#import "UIColor+Category.h"
+#import "UIFont+Category.h"
+#import "UIImage+Category.h"
+#import "UIView+Category.h"
+#import "NSDate+Category.h"
+#import "UIDevice+Category.h"
+#import "NSObject+Category.h"
+#import "NSString+Category.h"
+#import "UITextView+Category.h"
+#import "UIImageView+Category.h"
+#import "UIAlertController+Category.h"
+#import "UIViewController+Category.h"
+#import "NSAttributedString+Category.h"
+
+#import <YYModel.h>
+#import <Masonry.h>
+#import <SDWebImage.h>
+#import <MJRefresh.h>
+
+#define safeString(string) string.length ? string : @""
+#define scaleW(v) UIDevice.width*v/375
+#define scaleH(h) UIDevice.height*h/812
+
+//#ifdef DEBUG
+//#define NSLog(...) NSLog(@"\n%s ==> %d行\n%@",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])//__PRETTY_FUNCTION__
+//#else
+//#define NSLog(...)
+//#endif
+
+#define NSLog(fmt, ...) { NSString *str = [NSString stringWithFormat:(fmt), ##__VA_ARGS__]; \
+                         printf("%s\n", [str UTF8String]); \
+                         fflush(stdout); }
+
+#define BFWeakObject(c) __weak __typeof__(c) WeakObject = c;
+#define BFStrongObjectElseReturn(c) __strong __typeof__(c) c = WeakObject; if(!c) return;
+#define BFWeakSelf __weak __typeof__(self) WeakSelf = self;
+#define BFStrongSelf __strong __typeof__(self) self = WeakSelf;
+#define BFStrongSelfElseReturn __strong __typeof__(self) self = WeakSelf; if(!self) return;
+
+#define RESOLVE_CLASS_METHOD(_conditions, _selector) \
+if ( _conditions ) {\
+    Method method = class_getClassMethod([self class],_selector);\
+    Class metacls = objc_getMetaClass(NSStringFromClass([self class]).UTF8String);\
+    class_addMethod(metacls,selector,method_getImplementation(method),method_getTypeEncoding(method));\
+    return YES;\
+}\
+
+#endif
+
+#endif /* PrefixHeader_pch */
