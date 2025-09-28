@@ -639,35 +639,8 @@ static NSArray *_propertyList = @[];
                     excludedFiles:(NSArray *)excludedFiles
                    excludeFolders:(NSArray *)excludeFolders {
     
-    NSLog(@"==========================================");
-    NSLog(@"📊 检测结果汇总");
-    NSLog(@"目标属性: %@", propertyName);
-    NSLog(@"目标方法: set%@:", [propertyName capitalizedString]);
-    NSLog(@"排除目录: %@", [excludeFolders componentsJoinedByString:@", "]);
-    NSLog(@"------------------------------------------");
-    
-    if (foundFiles.count > 0) {
-        NSLog(@"🎉 共在 %lu 个文件中找到目标方法:", (unsigned long)foundFiles.count);
-        for (NSString *file in foundFiles) {
-            NSLog(@"   📍 %@", file);
-        }
-    } else {
-        NSLog(@"❌ 未在项目中找到目标方法");
-    }
-    
-    if (excludedFiles.count > 0) {
-        NSLog(@"\n🚫 已排除 %lu 个第三方库文件:", (unsigned long)excludedFiles.count);
-        // 只显示前10个排除的文件，避免输出太长
-        NSInteger maxShow = MIN(10, excludedFiles.count);
-        for (NSInteger i = 0; i < maxShow; i++) {
-            NSLog(@"   ⏩ %@", excludedFiles[i]);
-        }
-        if (excludedFiles.count > maxShow) {
-            NSLog(@"   ... 还有 %lu 个文件被排除", (unsigned long)(excludedFiles.count - maxShow));
-        }
-    }
-    
-    NSLog(@"==========================================\n");
+
+    NSLog(@"====================结束======================\n");
 }
 
 + (NSString *)getContextFromContent:(NSString *)content
@@ -708,6 +681,15 @@ static NSArray *_propertyList = @[];
 
 + (NSArray *)sysMethodList{
     return @[
+        @"menuView",
+        @"isRemoteRead",
+        @"JSONData",
+        @"JSONString",
+        @"coverUrl",
+        @"maxNum",
+        @"extent",
+        @"outputImage",
+        @"channelType",
         @"onNetworkQuality",
         @"onNERtcEngineUserVideoDidStartWithUserID",
         @"onNERtcEngineUserDidLeaveWithUserID",

@@ -49,13 +49,14 @@
 //    NSArray *fileList = [BFConfuseMethod extractAllMethodNamesFromProject:directory];
  
     
-    NSDictionary *dict = [BFConfuseMethod mapMethodDict102];
-    NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
-    for (NSString *key in dict.allKeys) {
-        if ([BFConfuseMethod.sysMethodList containsObject:key]){
-            NSLog(@"========+>>>>>> 白名单  %@",key);
-        }
-    }
+//    NSDictionary *dict = [BFConfuseMethod mapMethodDict102];
+//    [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
+//    NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+//    for (NSString *key in dict.allKeys) {
+//        if ([BFConfuseMethod.sysMethodList containsObject:key]){
+//            NSLog(@"========+>>>>>> 白名单  %@",key);
+//        }
+//    }
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -95,7 +96,7 @@
 //    [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict2];
 //      [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict2 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
 //    [BFConfuseFile customReplaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping102];
-//    [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict102];
+    [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict102];
 //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
 //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
 //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict4];

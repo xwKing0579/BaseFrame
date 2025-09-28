@@ -33,7 +33,7 @@
 
 
 //QMUIConfigurationTemplate
-//HLHeaderModel
+//HLHeaderModel、HLUIHelper
 + (NSDictionary *)fileMapping100{
     return [self parseModuleMappingJSON:@"className_yueyi"];
 }

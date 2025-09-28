@@ -7,7 +7,7 @@
     "HLIMSessionContentConfig":"",
     "HLIMSessionInteractorProtocol":"",
     "HLIMSessionPrivateProtocol":"",
-    
+
     "HLOSSTokenRequest": "YISCloudAuthCall",
     "HLWalletRequest": "YISFinancePetition",
     "HLDiscountRequest": "YISPromotionQuery",
