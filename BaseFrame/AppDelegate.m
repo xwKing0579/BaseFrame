@@ -49,8 +49,13 @@
 //    NSArray *fileList = [BFConfuseMethod extractAllMethodNamesFromProject:directory];
  
     
-//    NSDictionary *dict = [BFConfuseMethod mapMethodDict100];
-//    NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+    NSDictionary *dict = [BFConfuseMethod mapMethodDict102];
+    NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+    for (NSString *key in dict.allKeys) {
+        if ([BFConfuseMethod.sysMethodList containsObject:key]){
+            NSLog(@"========+>>>>>> 白名单  %@",key);
+        }
+    }
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -232,7 +237,7 @@
     }];
 
 
-    [BFConfuseMethod.mapMethodDict100 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+    [BFConfuseMethod.mapMethodDict102 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
         }else{

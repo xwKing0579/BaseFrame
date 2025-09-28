@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BFConfuseMethod : NSObject
 
+//白名单
++ (NSArray *)sysMethodList;
 //方法名替换
 + (void)safeReplaceContentInDirectory:(NSString *)directoryPath
                           excludeDirs:(NSArray<NSString *> *)excludeDirs
