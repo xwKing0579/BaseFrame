@@ -62,7 +62,7 @@
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/大图_副本";
 //    [UIImage processProjectImagesAtPath:directory intensity:1.0];
     //检查工具
-//    [self checkTool:directory];
+    [self checkTool:directory];
     
 
 //    //处理缺失的值

@@ -1,4 +1,13 @@
 {
+    "HLIMMessageCellProtocol":"",
+    "HLIMCellLayoutConfig":"",
+    "HLIMInputViewProtocol":"",
+    "HLIMKitSessionDataProvider":"",
+    "HLIMSessionConfig":"",
+    "HLIMSessionContentConfig":"",
+    "HLIMSessionInteractorProtocol":"",
+    "HLIMSessionPrivateProtocol":"",
+    
     "HLOSSTokenRequest": "YISCloudAuthCall",
     "HLWalletRequest": "YISFinancePetition",
     "HLDiscountRequest": "YISPromotionQuery",
