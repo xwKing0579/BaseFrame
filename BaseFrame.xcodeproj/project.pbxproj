@@ -20,6 +20,7 @@
 		F86188602E85BA8900335A20 /* UIImage+Confusion.m in Sources */ = {isa = PBXBuildFile; fileRef = F861885F2E85BA8900335A20 /* UIImage+Confusion.m */; };
 		F8642C672E85825C00290D17 /* NSArray+Catagory.m in Sources */ = {isa = PBXBuildFile; fileRef = F8642C662E85825C00290D17 /* NSArray+Catagory.m */; };
 		F8642C6B2E8582FD00290D17 /* className_yueyi 2.json in Resources */ = {isa = PBXBuildFile; fileRef = F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */; };
+		F86C2ACE2E8A1D680088E1F0 /* set_yueyi 2.json in Resources */ = {isa = PBXBuildFile; fileRef = F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */; };
 		F8792EFE2C587D4B00D26F2D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8792EFD2C587D4B00D26F2D /* AppDelegate.m */; };
 		F8792F012C587D4B00D26F2D /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8792F002C587D4B00D26F2D /* SceneDelegate.m */; };
 		F8792F072C587D4B00D26F2D /* Base in Resources */ = {isa = PBXBuildFile; fileRef = F8792F062C587D4B00D26F2D /* Base */; };
@@ -248,6 +249,7 @@
 		F8642C652E85825C00290D17 /* NSArray+Catagory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+Catagory.h"; sourceTree = "<group>"; };
 		F8642C662E85825C00290D17 /* NSArray+Catagory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Catagory.m"; sourceTree = "<group>"; };
 		F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "className_yueyi 2.json"; sourceTree = "<group>"; };
+		F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "set_yueyi 2.json"; sourceTree = "<group>"; };
 		F8792EF92C587D4B00D26F2D /* BaseFrame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BaseFrame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8792EFC2C587D4B00D26F2D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F8792EFD2C587D4B00D26F2D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -652,6 +654,7 @@
 		F83080CC2E7BF87A00B44C27 /* 社交 */ = {
 			isa = PBXGroup;
 			children = (
+				F86C2ACC2E8A1D510088E1F0 /* set */,
 				F88FD0232E7C6303008343AE /* Method */,
 				F83080CE2E7BF88900B44C27 /* File */,
 			);
@@ -732,6 +735,14 @@
 				F837404F2E371D7400126BDD /* method_mapLoan.json */,
 			);
 			path = Method;
+			sourceTree = "<group>";
+		};
+		F86C2ACC2E8A1D510088E1F0 /* set */ = {
+			isa = PBXGroup;
+			children = (
+				F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */,
+			);
+			path = set;
 			sourceTree = "<group>";
 		};
 		F8792EF02C587D4B00D26F2D = {
@@ -1668,6 +1679,7 @@
 				F89C58132D784C47000DE93F /* STSongti.ttf in Resources */,
 				F8D010292E544A22006F2042 /* constantString_spamCode.json in Resources */,
 				F83740502E371D7400126BDD /* method_mapLoan.json in Resources */,
+				F86C2ACE2E8A1D680088E1F0 /* set_yueyi 2.json in Resources */,
 				F8BD9CAA2E73280200A76F19 /* directory_jingyuege.json in Resources */,
 				F88FD0252E7C6311008343AE /* method_yueyi.json in Resources */,
 				F8D162722E2F621B00B4A4E0 /* ivar.json in Resources */,

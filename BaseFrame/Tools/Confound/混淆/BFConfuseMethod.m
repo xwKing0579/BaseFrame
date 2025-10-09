@@ -681,6 +681,7 @@ static NSArray *_propertyList = @[];
 
 + (NSArray *)sysMethodList{
     return @[
+        @"giftList",
         @"female",
         @"testLaunchPerformance",
         @"testLaunch",

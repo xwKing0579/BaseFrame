@@ -34,6 +34,10 @@
     return [self parseModuleMappingJSON:@"set_jingyuege"];
 }
 
++ (NSDictionary *)mapSetVariableDict102{
+    return [self parseModuleMappingJSON:@"set_yueyi 2"];
+}
+
 + (void)safeReplaceContentInDirectory:(NSString *)directoryPath
                         renameMapping:(NSDictionary<NSString *, NSString *> *)renameMapping{
     NSString *methodMap = [BFConfuseManager readObfuscationMappingFileAtPath:directoryPath name:@"局部变量映射"];

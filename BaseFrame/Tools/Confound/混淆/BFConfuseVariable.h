@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)mapSetVariableDict;
 + (NSDictionary *)mapSetVariableDict1;
 + (NSDictionary *)mapSetVariableDict4;
++ (NSDictionary *)mapSetVariableDict102;
 @end
 
 NS_ASSUME_NONNULL_END

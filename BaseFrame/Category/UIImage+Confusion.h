@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 + (BOOL)processProjectImagesAtPath:(NSString *)projectPath intensity:(CGFloat)intensity;
+
 @end
 
 NS_ASSUME_NONNULL_END
