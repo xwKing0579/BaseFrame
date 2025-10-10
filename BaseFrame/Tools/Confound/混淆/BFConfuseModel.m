@@ -23,6 +23,10 @@
     return [self parseModuleMappingJSON:@"model_jingyuege"];
 }
 
++ (NSDictionary *)mapModelDict103{
+    return [self parseModuleMappingJSON:@"model_yueyi 3"];
+}
+
 + (void)auditAndFixProjectAtPath:(NSString *)projectPath
                 propertyMappings:(NSDictionary<NSString *, NSString *> *)mappings
                   whitelistedPods:(NSArray<NSString *> *)whitelistedPods {

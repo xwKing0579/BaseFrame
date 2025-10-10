@@ -42,6 +42,10 @@
     return [self parseModuleMappingJSON:@"className_yueyi 2"];
 }
 
++ (NSDictionary *)fileMapping103{
+    return [self parseModuleMappingJSON:@"className_yueyi 3"];
+}
+
 + (NSDictionary *)fileMapping101{
     NSArray *list = [self parseModuleArrayJSON:@"className_nvliao"].allObjects;
     return @{};

@@ -22,6 +22,9 @@
     return [self parseModuleMappingJSON:@"constantString_jingyuege"];
 }
 
++ (NSDictionary *)mapConstantStringDict103{
+    return [self parseModuleMappingJSON:@"constantString_yueyi 3"];
+}
 
 + (void)safeReplaceContentInDirectory:(NSString *)directoryPath
                         renameMapping:(NSDictionary<NSString *, NSString *> *)renameMapping{
@@ -212,6 +215,109 @@
         
         if (error) {
             NSLog(@"Error writing file %@: %@", filePath, error.localizedDescription);
+        }
+    }
+}
+
+
+
+//搜索 #define修饰的单词
++ (NSArray<NSString *> *)findMacrosInProjectPath:(NSString *)projectPath {
+    NSMutableArray<NSString *> *macros = [NSMutableArray array];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 排除的目录
+    NSArray *excludedDirectories = @[@"Pods", @".framework"];
+    
+    // 获取项目路径下所有文件
+    NSArray *allFiles = [self getAllFilesInDirectory:projectPath excludedDirectories:excludedDirectories fileManager:fileManager];
+    
+    // 宏定义的正则表达式模式
+    NSString *pattern = @"^\\s*#define\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionAnchorsMatchLines error:nil];
+    
+    for (NSString *filePath in allFiles) {
+        // 只检查头文件和实现文件
+        if ([self isSourceFile:filePath]) {
+            NSString *content = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+            if (content) {
+                [self findMacrosInContent:content withRegex:regex addToArray:macros];
+            }
+        }
+    }
+    
+    // 去重并排序
+    NSArray *uniqueMacros = [[[NSSet setWithArray:macros] allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    
+    return uniqueMacros;
+}
+
+#pragma mark - Helper Methods
+
+// 递归获取目录下所有文件，排除指定目录
++ (NSArray<NSString *> *)getAllFilesInDirectory:(NSString *)directoryPath
+                           excludedDirectories:(NSArray<NSString *> *)excludedDirectories
+                                   fileManager:(NSFileManager *)fileManager {
+    
+    NSMutableArray *allFiles = [NSMutableArray array];
+    NSURL *directoryURL = [NSURL fileURLWithPath:directoryPath];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtURL:directoryURL
+                                          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                             options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                        errorHandler:^BOOL(NSURL *url, NSError *error) {
+        return YES;
+    }];
+    
+    for (NSURL *fileURL in enumerator) {
+        NSNumber *isDirectory;
+        [fileURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
+        
+        if (![isDirectory boolValue]) {
+            NSString *filePath = [fileURL path];
+            
+            // 检查是否在排除目录中
+            BOOL shouldExclude = NO;
+            for (NSString *excludedDir in excludedDirectories) {
+                if ([filePath containsString:excludedDir]) {
+                    shouldExclude = YES;
+                    break;
+                }
+            }
+            
+            if (!shouldExclude) {
+                [allFiles addObject:filePath];
+            }
+        }
+    }
+    
+    return [allFiles copy];
+}
+
+// 判断是否为源代码文件
++ (BOOL)isSourceFile:(NSString *)filePath {
+    NSString *extension = [[filePath pathExtension] lowercaseString];
+    NSArray *sourceExtensions = @[@"h", @"m", @"mm", @"c", @"cpp", @"cc", @"cxx"];
+    return [sourceExtensions containsObject:extension];
+}
+
+// 在文件内容中查找宏定义
++ (void)findMacrosInContent:(NSString *)content
+                  withRegex:(NSRegularExpression *)regex
+                 addToArray:(NSMutableArray<NSString *> *)macros {
+    
+    NSArray<NSTextCheckingResult *> *matches = [regex matchesInString:content
+                                                              options:0
+                                                                range:NSMakeRange(0, content.length)];
+    
+    for (NSTextCheckingResult *match in matches) {
+        if (match.numberOfRanges > 1) {
+            NSRange macroNameRange = [match rangeAtIndex:1];
+            NSString *macroName = [content substringWithRange:macroNameRange];
+            
+            if (macroName.length > 0) {
+                [macros addObject:macroName];
+            }
         }
     }
 }

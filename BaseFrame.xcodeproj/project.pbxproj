@@ -16,11 +16,15 @@
 		F83202042E28894600FA6F2E /* directory.json in Resources */ = {isa = PBXBuildFile; fileRef = F83202032E28894600FA6F2E /* directory.json */; };
 		F837404D2E371D4900126BDD /* className_mapLoan.json in Resources */ = {isa = PBXBuildFile; fileRef = F837404C2E371D4900126BDD /* className_mapLoan.json */; };
 		F83740502E371D7400126BDD /* method_mapLoan.json in Resources */ = {isa = PBXBuildFile; fileRef = F837404F2E371D7400126BDD /* method_mapLoan.json */; };
+		F84A37992E98EB7400A33C5D /* constantString_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */; };
+		F84A379C2E99038C00A33C5D /* model_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F84A379B2E99038C00A33C5D /* model_yueyi 3.json */; };
 		F861885D2E85BA2F00335A20 /* UIImage+Compare.m in Sources */ = {isa = PBXBuildFile; fileRef = F861885C2E85BA2F00335A20 /* UIImage+Compare.m */; };
 		F86188602E85BA8900335A20 /* UIImage+Confusion.m in Sources */ = {isa = PBXBuildFile; fileRef = F861885F2E85BA8900335A20 /* UIImage+Confusion.m */; };
 		F8642C672E85825C00290D17 /* NSArray+Catagory.m in Sources */ = {isa = PBXBuildFile; fileRef = F8642C662E85825C00290D17 /* NSArray+Catagory.m */; };
 		F8642C6B2E8582FD00290D17 /* className_yueyi 2.json in Resources */ = {isa = PBXBuildFile; fileRef = F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */; };
 		F86C2ACE2E8A1D680088E1F0 /* set_yueyi 2.json in Resources */ = {isa = PBXBuildFile; fileRef = F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */; };
+		F877904F2E97A2650057F596 /* className_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F877904E2E97A2650057F596 /* className_yueyi 3.json */; };
+		F87790512E97AF700057F596 /* method_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F87790502E97AF700057F596 /* method_yueyi 3.json */; };
 		F8792EFE2C587D4B00D26F2D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8792EFD2C587D4B00D26F2D /* AppDelegate.m */; };
 		F8792F012C587D4B00D26F2D /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F8792F002C587D4B00D26F2D /* SceneDelegate.m */; };
 		F8792F072C587D4B00D26F2D /* Base in Resources */ = {isa = PBXBuildFile; fileRef = F8792F062C587D4B00D26F2D /* Base */; };
@@ -217,6 +221,7 @@
 		F8E571162DC3630D00A7A261 /* BFConfuseManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F8E571152DC3630D00A7A261 /* BFConfuseManager.m */; };
 		F8E5711D2DC3D2D500A7A261 /* BFConfuseProject.m in Sources */ = {isa = PBXBuildFile; fileRef = F8E5711C2DC3D2D500A7A261 /* BFConfuseProject.m */; };
 		F8E571222DC3F08900A7A261 /* BFConfuseDirectory.m in Sources */ = {isa = PBXBuildFile; fileRef = F8E571212DC3F08900A7A261 /* BFConfuseDirectory.m */; };
+		F8F5514D2E97E4ED002B432B /* set_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F8F5514C2E97E4ED002B432B /* set_yueyi 3.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -242,6 +247,8 @@
 		F83202032E28894600FA6F2E /* directory.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = directory.json; sourceTree = "<group>"; };
 		F837404C2E371D4900126BDD /* className_mapLoan.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = className_mapLoan.json; sourceTree = "<group>"; };
 		F837404F2E371D7400126BDD /* method_mapLoan.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = method_mapLoan.json; sourceTree = "<group>"; };
+		F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "constantString_yueyi 3.json"; sourceTree = "<group>"; };
+		F84A379B2E99038C00A33C5D /* model_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "model_yueyi 3.json"; sourceTree = "<group>"; };
 		F861885B2E85BA2F00335A20 /* UIImage+Compare.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIImage+Compare.h"; sourceTree = "<group>"; };
 		F861885C2E85BA2F00335A20 /* UIImage+Compare.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Compare.m"; sourceTree = "<group>"; };
 		F861885E2E85BA8900335A20 /* UIImage+Confusion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIImage+Confusion.h"; sourceTree = "<group>"; };
@@ -250,6 +257,8 @@
 		F8642C662E85825C00290D17 /* NSArray+Catagory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Catagory.m"; sourceTree = "<group>"; };
 		F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "className_yueyi 2.json"; sourceTree = "<group>"; };
 		F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "set_yueyi 2.json"; sourceTree = "<group>"; };
+		F877904E2E97A2650057F596 /* className_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "className_yueyi 3.json"; sourceTree = "<group>"; };
+		F87790502E97AF700057F596 /* method_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "method_yueyi 3.json"; sourceTree = "<group>"; };
 		F8792EF92C587D4B00D26F2D /* BaseFrame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BaseFrame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8792EFC2C587D4B00D26F2D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F8792EFD2C587D4B00D26F2D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -605,6 +614,7 @@
 		F8E5711C2DC3D2D500A7A261 /* BFConfuseProject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BFConfuseProject.m; sourceTree = "<group>"; };
 		F8E571202DC3F08900A7A261 /* BFConfuseDirectory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BFConfuseDirectory.h; sourceTree = "<group>"; };
 		F8E571212DC3F08900A7A261 /* BFConfuseDirectory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BFConfuseDirectory.m; sourceTree = "<group>"; };
+		F8F5514C2E97E4ED002B432B /* set_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "set_yueyi 3.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -654,6 +664,8 @@
 		F83080CC2E7BF87A00B44C27 /* 社交 */ = {
 			isa = PBXGroup;
 			children = (
+				F84A379A2E99038900A33C5D /* Model */,
+				F84A37952E98EB5A00A33C5D /* ConstantString */,
 				F86C2ACC2E8A1D510088E1F0 /* set */,
 				F88FD0232E7C6303008343AE /* Method */,
 				F83080CE2E7BF88900B44C27 /* File */,
@@ -665,6 +677,7 @@
 			isa = PBXGroup;
 			children = (
 				F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */,
+				F877904E2E97A2650057F596 /* className_yueyi 3.json */,
 				F83080CF2E7BF89500B44C27 /* className_yueyi.json */,
 				F898791C2E7EAB710044178A /* className_nvliao.json */,
 			);
@@ -737,10 +750,27 @@
 			path = Method;
 			sourceTree = "<group>";
 		};
+		F84A37952E98EB5A00A33C5D /* ConstantString */ = {
+			isa = PBXGroup;
+			children = (
+				F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */,
+			);
+			path = ConstantString;
+			sourceTree = "<group>";
+		};
+		F84A379A2E99038900A33C5D /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				F84A379B2E99038C00A33C5D /* model_yueyi 3.json */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		F86C2ACC2E8A1D510088E1F0 /* set */ = {
 			isa = PBXGroup;
 			children = (
 				F86C2ACD2E8A1D680088E1F0 /* set_yueyi 2.json */,
+				F8F5514C2E97E4ED002B432B /* set_yueyi 3.json */,
 			);
 			path = set;
 			sourceTree = "<group>";
@@ -1414,6 +1444,7 @@
 			children = (
 				F88FD0242E7C6311008343AE /* method_yueyi.json */,
 				F80C4AAF2E87132300DF7A57 /* method_yueyi 2.json */,
+				F87790502E97AF700057F596 /* method_yueyi 3.json */,
 				F898791A2E7EAB5D0044178A /* method_nvliao.json */,
 			);
 			path = Method;
@@ -1637,9 +1668,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F84A37992E98EB7400A33C5D /* constantString_yueyi 3.json in Resources */,
 				F8D1625D2E2F5E8700B4A4E0 /* className_xixi.json in Resources */,
 				F87DD6782E75BC78001821CE /* set_jingyuege.json in Resources */,
 				F80C4AB02E87132300DF7A57 /* method_yueyi 2.json in Resources */,
+				F8F5514D2E97E4ED002B432B /* set_yueyi 3.json in Resources */,
 				F898791B2E7EAB5D0044178A /* method_nvliao.json in Resources */,
 				F87DD6742E7543B1001821CE /* property_jingyuege.json in Resources */,
 				F8792F092C587D4C00D26F2D /* Assets.xcassets in Resources */,
@@ -1657,6 +1690,8 @@
 				F8236FBD2E3CBCF000E1195A /* method_jingyuege.json in Resources */,
 				F898791D2E7EAB710044178A /* className_nvliao.json in Resources */,
 				F88C6BEE2E3CD79E00AAEAEB /* model_xixi.json in Resources */,
+				F877904F2E97A2650057F596 /* className_yueyi 3.json in Resources */,
+				F84A379C2E99038C00A33C5D /* model_yueyi 3.json in Resources */,
 				F87930912C5885E900D26F2D /* Assets.xcassets in Resources */,
 				F88C6BF22E3CD91100AAEAEB /* imageName_xixi.json in Resources */,
 				F89DD5702E3866ED005BCD82 /* imageName_mapLoan.json in Resources */,
@@ -1680,6 +1715,7 @@
 				F8D010292E544A22006F2042 /* constantString_spamCode.json in Resources */,
 				F83740502E371D7400126BDD /* method_mapLoan.json in Resources */,
 				F86C2ACE2E8A1D680088E1F0 /* set_yueyi 2.json in Resources */,
+				F87790512E97AF700057F596 /* method_yueyi 3.json in Resources */,
 				F8BD9CAA2E73280200A76F19 /* directory_jingyuege.json in Resources */,
 				F88FD0252E7C6311008343AE /* method_yueyi.json in Resources */,
 				F8D162722E2F621B00B4A4E0 /* ivar.json in Resources */,

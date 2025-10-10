@@ -549,4 +549,172 @@
 }
 
 
+
+
+
++ (NSArray<NSString *> *)detectStringsInDirectory:(NSString *)directoryPath
+                                  targetStrings:(NSArray<NSString *> *)targetStrings {
+    
+    NSMutableArray<NSString *> *results = [NSMutableArray array];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 检查目录是否存在
+    BOOL isDirectory = NO;
+    BOOL exists = [fileManager fileExistsAtPath:directoryPath isDirectory:&isDirectory];
+    
+    if (!exists || !isDirectory) {
+        NSLog(@"错误：目录不存在或不是目录 - %@", directoryPath);
+        return @[];
+    }
+    
+    // 获取目录下所有文件
+    NSArray *files = [self getAllFilesInDirectory:directoryPath excludingPods:YES];
+    
+    for (NSString *filePath in files) {
+        if ([self isTextFile:filePath]) {
+            NSError *error = nil;
+            NSString *fileContent = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
+            
+            if (error) {
+                // 尝试其他编码
+                fileContent = [NSString stringWithContentsOfFile:filePath usedEncoding:nil error:&error];
+                if (error) {
+                    continue;
+                }
+            }
+            
+            if (fileContent) {
+                for (NSString *targetString in targetStrings) {
+                    // 使用更精确的匹配方法
+                    NSArray *matches = [self findExactMatchesOfString:targetString inContent:fileContent filePath:filePath];
+                    [results addObjectsFromArray:matches];
+                }
+            }
+        }
+    }
+    
+
+    return [results copy];
+}
+
+#pragma mark - 精确匹配方法
+
+/// 精确查找字符串匹配
++ (NSArray<NSString *> *)findExactMatchesOfString:(NSString *)targetString
+                                        inContent:(NSString *)content
+                                         filePath:(NSString *)filePath {
+    
+    NSMutableArray<NSString *> *matches = [NSMutableArray array];
+    
+    // 构建要搜索的精确模式：@"目标字符串"
+    NSString *exactPattern = [NSString stringWithFormat:@"@\"%@\"", targetString];
+    
+    // 使用正则表达式进行精确匹配，避免部分匹配
+    NSError *regexError = nil;
+    
+    // 注意：这里需要对目标字符串中的特殊正则字符进行转义
+    NSString *escapedTargetString = [NSRegularExpression escapedPatternForString:targetString];
+    NSString *regexPattern = [NSString stringWithFormat:@"@\"%@\"", escapedTargetString];
+    
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:regexPattern
+                                                                           options:0
+                                                                             error:&regexError];
+    
+    if (regexError) {
+        NSLog(@"正则表达式错误: %@", regexError);
+        return @[];
+    }
+    
+    // 获取所有匹配
+    NSArray<NSTextCheckingResult *> *regexMatches = [regex matchesInString:content
+                                                                   options:0
+                                                                     range:NSMakeRange(0, content.length)];
+    
+    if (regexMatches.count > 0) {
+        // 按行分析，提供更精确的位置信息
+        NSArray *lines = [content componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+        
+        NSUInteger currentLocation = 0;
+        for (NSUInteger lineNumber = 0; lineNumber < lines.count; lineNumber++) {
+            NSString *line = lines[lineNumber];
+            NSRange lineRange = NSMakeRange(currentLocation, line.length);
+            
+            // 检查这一行是否有匹配
+            for (NSTextCheckingResult *match in regexMatches) {
+                if (NSLocationInRange(match.range.location, lineRange)) {
+                    // 清理文件路径，只显示相对路径
+                    NSString *relativePath = [self relativePathFromAbsolutePath:filePath];
+                    NSString *result = [NSString stringWithFormat:@"文件: %@ 包含: %@",
+                                      relativePath.lastPathComponent, exactPattern];
+                    if (![matches containsObject:result]){
+                        [matches addObject:result];
+                    }
+                }
+            }
+            
+            currentLocation += line.length + 1; // +1 用于换行符
+        }
+    }
+    
+    return [matches copy];
+}
+
+#pragma mark - 辅助方法
+
+/// 获取目录下所有文件路径（递归）
++ (NSArray<NSString *> *)getAllFilesInDirectory:(NSString *)directoryPath excludingPods:(BOOL)excludePods {
+    NSMutableArray<NSString *> *allFiles = [NSMutableArray array];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    NSURL *directoryURL = [NSURL fileURLWithPath:directoryPath];
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtURL:directoryURL
+                                          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                             options:0
+                                                        errorHandler:^BOOL(NSURL *url, NSError *error) {
+        NSLog(@"遍历错误: %@", error);
+        return YES;
+    }];
+    
+    for (NSURL *fileURL in enumerator) {
+        NSNumber *isDirectory;
+        [fileURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:nil];
+        
+        NSString *filePath = [fileURL path];
+        
+        // 排除Pods目录
+        if (excludePods && [filePath containsString:@"/Pods/"]) {
+            [enumerator skipDescendants];
+            continue;
+        }
+        
+        if (![isDirectory boolValue]) {
+            [allFiles addObject:filePath];
+        }
+    }
+    
+    return [allFiles copy];
+}
+
+/// 判断是否为文本文件
++ (BOOL)isTextFile:(NSString *)filePath {
+    NSString *fileExtension = [[filePath pathExtension] lowercaseString];
+    
+    // 常见的文本文件扩展名
+    NSSet *textFileExtensions = [NSSet setWithArray:@[
+        @"m", @"mm", @"h", @"c", @"cpp", @"swift",
+        @"json", @"plist", @"xml", @"html", @"css", @"js",
+        @"txt", @"md", @"strings", @"storyboard", @"xib"
+    ]];
+    
+    return [textFileExtensions containsObject:fileExtension];
+}
+
+/// 从绝对路径获取相对路径（用于美化输出）
++ (NSString *)relativePathFromAbsolutePath:(NSString *)absolutePath {
+    NSString *currentDirectory = [[NSFileManager defaultManager] currentDirectoryPath];
+    if ([absolutePath hasPrefix:currentDirectory]) {
+        return [absolutePath substringFromIndex:currentDirectory.length + 1];
+    }
+    return absolutePath;
+}
 @end

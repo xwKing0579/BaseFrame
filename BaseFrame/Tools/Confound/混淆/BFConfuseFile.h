@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)fileMapping100;
 + (NSDictionary *)fileMapping101;
 + (NSDictionary *)fileMapping102;
++ (NSDictionary *)fileMapping103;
 @end
 
 NS_ASSUME_NONNULL_END

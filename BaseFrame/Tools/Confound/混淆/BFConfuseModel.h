@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)mapModelDict;
 + (NSDictionary *)mapModelDict1;
 + (NSDictionary *)mapModelDict2;
-
++ (NSDictionary *)mapModelDict103;
 @end
 
 NS_ASSUME_NONNULL_END

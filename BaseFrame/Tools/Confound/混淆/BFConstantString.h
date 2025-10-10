@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 //中文字符串替换
 + (void)replaceStringsInProjectAtPath:(NSString *)projectPath;
 
+//搜索 #define修饰的单词
++ (NSArray<NSString *> *)findMacrosInProjectPath:(NSString *)projectPath;
+
 //常量字符串替换
 + (void)safeReplaceContentInDirectory:(NSString *)directoryPath
                         renameMapping:(NSDictionary<NSString *, NSString *> *)renameMapping;
@@ -21,6 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)mapConstantStringDict;
 + (NSDictionary *)mapConstantStringDict1;
 + (NSDictionary *)mapConstantStringDict4;
+
++ (NSDictionary *)mapConstantStringDict103;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)mapMethodDict100;
 + (NSDictionary *)mapMethodDict101;
 + (NSDictionary *)mapMethodDict102;
++ (NSDictionary *)mapMethodDict103;
 @end
 
 NS_ASSUME_NONNULL_END

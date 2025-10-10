@@ -42,21 +42,28 @@
     
     //    [BFConfuseDirectory calculateAndPrintDirectorySizes:directory];
     //类名
-    NSArray *fileList = [BFConfuseFile getTotalControllersInDirectory:directory];
-    NSLog(@"%@",fileList);
+//        NSArray *fileList = [BFConfuseFile getTotalControllersInDirectory:directory];
+    //    NSLog(@"%@",fileList);
     
     //方法名
-    //    NSArray *fileList = [BFConfuseMethod extractAllMethodNamesFromProject:directory];
+//    NSArray *methodList = [BFConfuseMethod extractAllMethodNamesFromProject:directory];
+//    NSLog(@"%@",methodList);
     
+    //常量字符串
+//    NSArray *constantList = [BFConstantString findMacrosInProjectPath:directory];
+//    NSLog(@"%@",constantList);
     
-    //    NSDictionary *dict = [BFConfuseMethod mapMethodDict102];
-    //    [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
-    //    NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
-    //    for (NSString *key in dict.allKeys) {
-    //        if ([BFConfuseMethod.sysMethodList containsObject:key]){
-    //            NSLog(@"========+>>>>>> 白名单  %@",key);
-    //        }
-    //    }
+        NSDictionary *dict = [BFConfuseMethod mapMethodDict103];
+        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
+        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+        for (NSString *key in dict.allKeys) {
+            if ([BFConfuseMethod.sysMethodList containsObject:key]){
+                NSLog(@"========+>>>>>> 白名单  %@",key);
+            }
+        }
+    
+//    NSArray *wordList = [BFConfuseManager detectStringsInDirectory:directory targetStrings:BFConfuseMethod.mapMethodDict103.allKeys];
+//    NSLog(@"%@",wordList);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -64,22 +71,21 @@
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
     
     
-    NSString *directory = @"/Users/wangxiangwei/Desktop/社交/越轻盈";
-    //    NSString *directory = @"/Users/wangxiangwei/Desktop/大图_副本";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/社交/越轻盈_副本";
+//    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
     //    [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具
     [self checkTool:directory];
     
     
-    
-    //    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
+//    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
     
     
     //    [BFConfuseProject renameProjectAtPath:directory oldName:@"DeepBooks" newName:@"YueGeJing"];
     //    [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict2];
-    //      [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict2 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
+//          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict103 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
     //    [BFConfuseFile customReplaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping102];
-    //    [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict102];
+            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
     //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict102];
@@ -88,7 +94,7 @@
     //    [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict4];
     //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
     //    [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:33];
-    //    [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
+//        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
     //    [BFConfuseMarker addCommentsToProjectAtPath:directory];
     //    [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
     /*
@@ -174,8 +180,8 @@
             }
         }
     }];
-
-
+    
+    
     [BFConfuseFile.fileMapping1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
@@ -208,8 +214,8 @@
             }
         }
     }];
-
-
+    
+    
     [BFConfuseMethod.mapMethodDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([obj length] > 0){
             if ([allWords containsObject:obj]){
@@ -237,8 +243,8 @@
             }
         }
     }];
-
-
+    
+    
     [BFConfuseProperty.mapPropertyDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
@@ -271,7 +277,7 @@
             }
         }
     }];
-
+    
     [BFConfuseVariable.mapVariableDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
@@ -295,7 +301,7 @@
             }
         }
     }];
-
+    
     [BFConfuseVariable.mapSetVariableDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
@@ -319,7 +325,7 @@
             }
         }
     }];
-
+    
     [BFConstantString.mapConstantStringDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
@@ -343,7 +349,7 @@
             }
         }
     }];
-
+    
     [BFConfuseImage.mapImageDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([obj length] > 0){
             if ([allWords containsObject:obj]){
@@ -362,7 +368,7 @@
             }
         }
     }];
-
+    
     [BFConfuseModel.mapModelDict1 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([obj length] > 0){
             if ([allWords containsObject:obj]){
@@ -385,12 +391,21 @@
 
 - (void)chaChongInAllWords2{
     NSMutableSet *allWords = [NSMutableSet set];
-    [BFConfuseMethod.mapMethodDict100 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+    [BFConfuseFile.fileMapping102 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([allWords containsObject:key]){
             NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
         }else{
             [allWords addObject:key];
         }
+        if ([obj length] > 0){
+            if ([allWords containsObject:obj]){
+                NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
+            }else{
+                [allWords addObject:obj];
+            }
+        }
+    }];
+    [BFConfuseFile.fileMapping103 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         if ([obj length] > 0){
             if ([allWords containsObject:obj]){
                 NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
@@ -414,6 +429,61 @@
             }
         }
     }];
+    [BFConfuseVariable.mapSetVariableDict103 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([obj length] > 0){
+            if ([allWords containsObject:obj]){
+                NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
+            }else{
+                [allWords addObject:obj];
+            }
+        }
+    }];
+    
+    [BFConfuseMethod.mapMethodDict103 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([allWords containsObject:key]){
+            NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
+        }else{
+            [allWords addObject:key];
+        }
+        if ([obj length] > 0){
+            if ([allWords containsObject:obj]){
+                NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
+            }else{
+                [allWords addObject:obj];
+            }
+        }
+    }];
+    
+    [BFConstantString.mapConstantStringDict103 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([allWords containsObject:key]){
+            NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
+        }else{
+            [allWords addObject:key];
+        }
+        if ([obj length] > 0){
+            if ([allWords containsObject:obj]){
+                NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
+            }else{
+                [allWords addObject:obj];
+            }
+        }
+    }];
+    
+    [BFConfuseModel.mapModelDict103 enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([allWords containsObject:key]){
+            NSLog(@"==========>>>>>>>>>>>已包含key %@",key);
+        }else{
+            [allWords addObject:key];
+        }
+        if ([obj length] > 0){
+            if ([allWords containsObject:obj]){
+                NSLog(@"==========>>>>>>>>>>>已包含value %@",obj);
+            }else{
+                [allWords addObject:obj];
+            }
+        }
+    }];
+    
 }
 
 NSDictionary *processDictionaries(NSDictionary *dictA, NSDictionary *dictB) {

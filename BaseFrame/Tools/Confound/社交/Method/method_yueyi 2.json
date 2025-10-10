@@ -27,7 +27,6 @@
     "friendsRequest": "yis_ContactNetworkQuery",
     "inCallStatus": "yis_LiveConnectionState",
     "HLCallStatusInCall": "yis_OngoingCallState",
-    
     "VersionComparisonResult": "yis_BuildAnalysisOutcome",
     "VersionComparisonResultCurrentHigher": "yis_SuperiorReleaseFound",
     "VersionComparisonResultCurrentLower": "yis_PreviousReleaseDetected",
@@ -1110,7 +1109,6 @@
     "HLFaceDataTypeSticker": "yis_DecorationApplyCategory",
     "HLFaceDataTypeMakeup": "yis_CosmeticApplyCategory",
     "HLFaceDataTypebody": "yis_BodyProcessCategory",
-    
     "onCallEnd": "yis_communicationCompletion",
     "cellWithSettings": "yis_preferencesCell",
     "stringWithUUID": "yis_universalUniqueString",

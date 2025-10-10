@@ -36,6 +36,10 @@ static NSArray *_propertyList = @[];
     return [self parseModuleMappingJSON:@"method_yueyi 2"];
 }
 
++ (NSDictionary *)mapMethodDict103{
+    return [self parseModuleMappingJSON:@"method_yueyi 3"];
+}
+
 + (NSDictionary *)mapMethodDict101{
     NSArray *list = [self parseModuleArrayJSON:@"method_yueyi 2"].allObjects;
     NSMutableArray *array = [NSMutableArray array];
@@ -896,7 +900,7 @@ static NSArray *_propertyList = @[];
         @"getCurrentTopVC",@"getFileName",@"getFirstFrameFromVideoURL",@"getToken",@"getVersion",
         @"getView",@"handleLongPress",@"handleOpenUniversalLink",@"handlePanGesture",
         @"handleResponse",@"handleSwipeGesture",@"handleTap",@"handleTapGesture",
-        @"handleTextFieldCharLength",@"headerRefresh",@"headerRereshing",
+        @"handleTextFieldCharLength",@"headerRereshing",
         @"heightForPinSectionHeaderInPagerView",@"hiddenBackgroundImageView",@"hidePopup",
         @"hideSwipeAnimated",@"hideToolbarViewWithKeyboardUserInfo",@"imageFromPixelBuffer",@"imageView",
         @"imageWithName",@"indexOfAccessibilityElement",@"indicatorView",@"infoLabel",@"initWith",
@@ -917,7 +921,7 @@ static NSArray *_propertyList = @[];
         @"colorWithHex",@"colorWithHexString",@"commonInit",@"configure",@"configureUI",
         @"containsChinese",@"containsEmoticon",@"containsURLKeyword",@"contentView",@"contentOffsetIsValid",
         @"copyAction",@"copyText",@"createImageWithColor",@"createUI",@"currentTimeStamp",
-        @"currentTopViewController",@"currentViewControllerWithRootViewController",@"customizeInterface",
+        @"currentTopViewController",@"currentViewControllerWithRootViewController",
         @"dateChanged",@"decodeBase64Data",@"decodeBase64String",@"decodeData",@"decodeString",
         @"defaultConfig",@"defaultSetting",@"delayAction",@"dismissViewControllerAnimated",
         @"URLSession",@"addEntriesFromDictionary",@"addGestureRecognizer",@"addNotificationObserver",

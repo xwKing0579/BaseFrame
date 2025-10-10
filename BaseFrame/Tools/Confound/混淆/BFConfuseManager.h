@@ -79,6 +79,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param excludeDirs 排除目录名数组（如@[@"Pods"]）
 + (void)replaceInDirectory:(NSString *)sourceDir withJSONRuleFile:(NSString *)jsonPath excludeDirs:(NSArray<NSString *> *)excludeDirs;
 
+
+
+
+/// 检测指定路径下所有文件（除Pods外）是否包含字符串数组中的内容
+/// @param directoryPath 要检测的目录路径
+/// @param targetStrings 要检测的字符串数组
+/// @return 包含所有匹配字符串的数组
++ (NSArray<NSString *> *)detectStringsInDirectory:(NSString *)directoryPath
+                                  targetStrings:(NSArray<NSString *> *)targetStrings;
+
 @end
 
 NS_ASSUME_NONNULL_END
