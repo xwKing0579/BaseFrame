@@ -550,81 +550,13 @@ static NSArray *_propertyList = @[];
     ];
 }
 
-+ (BOOL)shouldExcludePath:(NSString *)filePath excludeFolders:(NSArray *)excludeFolders {
-    for (NSString *folder in excludeFolders) {
-        if ([filePath containsString:folder]) {
-            return YES;
-        }
-    }
-    return NO;
-}
 
-+ (void)detectSetterMethodInProject:(NSString *)projectPath
-                       propertyName:(NSString *)propertyName
-                     excludeFolders:(NSArray *)excludeFolders {
-    
-    NSString *setterName = [NSString stringWithFormat:@"set%@:",
-                           [propertyName capitalizedString]];
 
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:projectPath];
-    
-    NSMutableArray *foundFiles = [NSMutableArray array];
-    NSMutableArray *excludedFiles = [NSMutableArray array];
-    NSString *filePath;
-    
-    while ((filePath = [enumerator nextObject])) {
-        NSString *extension = [filePath pathExtension];
-        
-        // 只检查 .m 和 .mm 文件
-        if ([extension isEqualToString:@"m"] || [extension isEqualToString:@"mm"]) {
-            
-            // 检查是否在白名单中
-            if ([self shouldExcludePath:filePath excludeFolders:excludeFolders]) {
-                [excludedFiles addObject:filePath];
-                continue; // 跳过这个文件
-            }
-            
-            NSString *fullPath = [projectPath stringByAppendingPathComponent:filePath];
-            
-            NSError *error;
-            NSString *fileContent = [NSString stringWithContentsOfFile:fullPath
-                                                             encoding:NSUTF8StringEncoding
-                                                                error:&error];
-            
-            if (!error && fileContent) {
-                NSRange range = [fileContent rangeOfString:setterName];
-                if (range.location != NSNotFound) {
-                    [foundFiles addObject:filePath];
-                    
-                    NSString *context = [self getContextFromContent:fileContent
-                                                          atRange:range
-                                                      linesBefore:2
-                                                       linesAfter:2];
-                    
-                    NSLog(@"✅ 在文件中找到: %@", filePath);
-                    NSLog(@"📄 上下文:\n%@", context);
-                    NSLog(@"---");
-                }
-            }
-        }
-    }
-    
-    // 输出结果汇总
-    [self printSummaryForProperty:propertyName
-                        foundFiles:foundFiles
-                    excludedFiles:excludedFiles
-                    excludeFolders:excludeFolders];
-}
 
-+ (void)detectSetterMethodInProject:(NSString *)projectPath
-                       propertyName:(NSString *)propertyName {
-    
-    // 使用默认白名单
-    [self detectSetterMethodInProject:projectPath
-                         propertyName:propertyName
-                       excludeFolders:[self defaultExcludeFolders]];
-}
+
+
+
+
 
 + (void)detectMultipleSettersInProject:(NSString *)projectPath
                          propertyNames:(NSArray *)propertyNames
@@ -636,15 +568,7 @@ static NSArray *_propertyList = @[];
                              propertyName:propertyName
                            excludeFolders:excludeFolders];
     }
-}
-
-+ (void)printSummaryForProperty:(NSString *)propertyName
-                      foundFiles:(NSArray *)foundFiles
-                    excludedFiles:(NSArray *)excludedFiles
-                   excludeFolders:(NSArray *)excludeFolders {
-    
-
-    NSLog(@"====================结束======================\n");
+    NSLog(@"-------------------------结束-------------------------");
 }
 
 + (NSString *)getContextFromContent:(NSString *)content
@@ -682,6 +606,63 @@ static NSArray *_propertyList = @[];
     return context;
 }
 
++ (void)detectSetterMethodInProject:(NSString *)projectPath
+                       propertyName:(NSString *)propertyName
+                     excludeFolders:(NSArray *)excludeFolders {
+    
+    NSString *capitalizedPropertyName = [propertyName stringByReplacingCharactersInRange:NSMakeRange(0,1)
+                                                                              withString:[[propertyName substringToIndex:1] uppercaseString]];
+    NSString *setterName = [NSString stringWithFormat:@"set%@:", capitalizedPropertyName];
+
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:projectPath];
+    
+    NSMutableArray *excludedFiles = [NSMutableArray array];
+    NSString *filePath;
+    
+    while ((filePath = [enumerator nextObject])) {
+        NSString *extension = [filePath pathExtension];
+        
+        // 只检查 .m 和 .mm 文件
+        if ([extension isEqualToString:@"m"] || [extension isEqualToString:@"mm"]) {
+            
+            // 检查是否在白名单中
+            if ([self shouldExcludePath:filePath excludeFolders:excludeFolders]) {
+                [excludedFiles addObject:filePath];
+                continue; // 跳过这个文件
+            }
+            
+            NSString *fullPath = [projectPath stringByAppendingPathComponent:filePath];
+            
+            NSError *error;
+            NSString *fileContent = [NSString stringWithContentsOfFile:fullPath
+                                                             encoding:NSUTF8StringEncoding
+                                                                error:&error];
+            if (setterName && [fileContent containsString:setterName]) {
+                NSLog(@"✅ 在文件中找到: %@", filePath);
+                NSLog(@"📄 上下文:\n%@", propertyName);
+            }
+        }
+    }
+}
+
++ (void)detectSetterMethodInProject:(NSString *)projectPath
+                       propertyName:(NSString *)propertyName {
+    
+    // 使用默认白名单
+    [self detectSetterMethodInProject:projectPath
+                         propertyName:propertyName
+                       excludeFolders:[self defaultExcludeFolders]];
+}
+
++ (BOOL)shouldExcludePath:(NSString *)filePath excludeFolders:(NSArray *)excludeFolders {
+    for (NSString *folder in excludeFolders) {
+        if ([filePath containsString:folder]) {
+            return YES;
+        }
+    }
+    return NO;
+}
 
 + (NSArray *)sysMethodList{
     return @[
