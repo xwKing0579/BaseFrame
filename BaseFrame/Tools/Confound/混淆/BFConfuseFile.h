@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param directory 要处理的目录路径
  @param replaceDict 替换字典 @{@"OldName": @"NewName"}
  */
-+ (void)customReplaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict;
++ (void)replaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict;
 
 + (void)randomReplaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict;
 

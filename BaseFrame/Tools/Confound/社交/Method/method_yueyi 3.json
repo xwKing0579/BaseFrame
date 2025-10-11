@@ -1,4 +1,6 @@
 {
+    "dialogViewControllerAppearance":"",
+    "moreOperationViewControllerAppearance":"",
     "tableHeaderViewHeightInPagerView": "xy_pagerHeaderDimension",
     "tableHeaderViewInPagerView": "xy_pagerHeaderContainer",
     "tableViewCellAccessoryTypeWithStaticAccessoryType": "xy_cellDecorationType",

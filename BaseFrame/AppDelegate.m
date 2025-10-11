@@ -42,8 +42,8 @@
     
     //    [BFConfuseDirectory calculateAndPrintDirectorySizes:directory];
     //类名
-//        NSArray *fileList = [BFConfuseFile getTotalControllersInDirectory:directory];
-    //    NSLog(@"%@",fileList);
+//    NSArray *fileList = [BFConfuseFile getTotalControllersInDirectory:directory];
+//    NSLog(@"%@",fileList);
     
     //方法名
 //    NSArray *methodList = [BFConfuseMethod extractAllMethodNamesFromProject:directory];
@@ -53,7 +53,7 @@
 //    NSArray *constantList = [BFConstantString findMacrosInProjectPath:directory];
 //    NSLog(@"%@",constantList);
     
-//        NSDictionary *dict = [BFConfuseMethod mapMethodDict103];
+//        NSDictionary *dict = [BFConstantString mapConstantStringDict103];
 //        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
 //        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
 //        for (NSString *key in dict.allKeys) {
@@ -84,7 +84,7 @@
     //    [BFConfuseProject renameProjectAtPath:directory oldName:@"DeepBooks" newName:@"YueGeJing"];
     //    [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict2];
 //          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict103 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
-    //    [BFConfuseFile customReplaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping102];
+//        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping103];
 //            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
     //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
@@ -112,7 +112,7 @@
      
      
      //类名 并存储对应映射文件.txt
-     [BFConfuseFile customReplaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping];
+     [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping];
      
      //类别名 特殊处理
      [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"XXSmall"];

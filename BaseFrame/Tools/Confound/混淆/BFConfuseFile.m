@@ -51,45 +51,6 @@
     return @{};
 }
 
-+ (void)customReplaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict{
-    NSString *string = [BFConfuseManager readObfuscationMappingFileAtPath:directory];
-    if (string){
-        NSData *jsonData = [string dataUsingEncoding:NSUTF8StringEncoding];
-        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:nil];
-        [BFConfuseFile replaceInDirectory:directory replaceDict:dict];
-    }else{
-        [BFConfuseManager writeData:replaceDict toPath:directory fileName:@"混淆/文件名映射"];
-        [BFConfuseFile replaceInDirectory:directory replaceDict:replaceDict];
-    }
-}
-
-+ (void)randomReplaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict{
-    NSArray *list = [self getTotalControllersInDirectory:directory];
-    NSArray *wordList = [BFConfuseManager searchAndProcessArray:list withPrefixes:nil];
-    
-    NSString *string = [BFConfuseManager readObfuscationMappingFileAtPath:directory];
-    if (string){
-        NSData *jsonData = [string dataUsingEncoding:NSUTF8StringEncoding];
-        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:nil];
-        [BFConfuseFile replaceInDirectory:directory replaceDict:dict];
-    }else{
-        NSArray *replaceList = [BFWordsRackTool getWordsWithType:ReadingWordsType];
-        NSDictionary *dict = [BFConfuseManager wordList:wordList prefix:@"YDS" replaceList:replaceList exceptList:@[@"Model"] replactDict:@{@"View":@"V",@"Controller":@"C",@"Table":@"T"}];
-        [BFConfuseManager writeData:dict toPath:directory fileName:@"混淆/文件名映射"];
-        [BFConfuseFile replaceInDirectory:directory replaceDict:dict];
-    }
-}
-
-+ (NSArray *)getTotalControllersInDirectory:(NSString *)directory{
-    NSArray *exceptDirs = @[@"Pods"];
-    NSArray *includeFiles = @[@"h",@"swift"];
-    NSString *pattern = @"(?<=@interface\\s)[A-Za-z_][A-Za-z0-9_]*(?=\\s*:)";
-    NSArray *list = [BFConfuseManager searchDirectory:directory exceptDirs:exceptDirs includeFiles:includeFiles regexPattern:pattern returnPatten:YES error:nil];
-    NSMutableArray *result = [NSMutableArray arrayWithArray:list];
-    [result removeObjectsInArray:@[@"SceneDelegate",@"AppDelegate"]];
-    return result;
-}
-
 + (void)replaceInDirectory:(NSString *)directory replaceDict:(NSDictionary *)replaceDict {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:directory];
@@ -118,94 +79,14 @@
             else if ([self shouldProcessFileWithExtension:fileExtension]) {
                 // 先处理文件内容替换
                 [self replaceInSourceFile:fullPath replaceDict:replaceDict];
-                // 然后处理文件重命名
+                // 然后处理文件重命名（包括分类文件）
                 [self renameFileIfNeeded:fullPath relativePath:relativePath replaceDict:replaceDict];
             }
         }
     }
 }
 
-// 新增：处理源代码文件内容替换
-+ (void)replaceInSourceFile:(NSString *)filePath replaceDict:(NSDictionary *)replaceDict {
-    NSError *error = nil;
-    NSMutableString *content = [NSMutableString stringWithContentsOfFile:filePath
-                                                                encoding:NSUTF8StringEncoding
-                                                                   error:&error];
-    if (error) {
-        NSLog(@"读取失败: %@", filePath.lastPathComponent);
-        return;
-    }
-    
-    __block BOOL changesMade = NO;
-    [replaceDict enumerateKeysAndObjectsUsingBlock:^(NSString *oldName, NSString *newName, BOOL *stop) {
-        // 使用单词边界确保完整匹配，大小写敏感
-        NSString *pattern = [NSString stringWithFormat:@"\\b%@\\b", [NSRegularExpression escapedPatternForString:oldName]];
-        
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
-                                                                               options:0
-                                                                                 error:nil];
-        if (regex) {
-            NSUInteger replacements = [regex replaceMatchesInString:content
-                                                            options:0
-                                                              range:NSMakeRange(0, content.length)
-                                                       withTemplate:newName];
-            if (replacements > 0) {
-                changesMade = YES;
-                NSLog(@"在 %@ 中替换内容 %@ → %@ (%lu处)", filePath.lastPathComponent, oldName, newName, (unsigned long)replacements);
-            }
-        }
-    }];
-    
-    if (changesMade) {
-        if (![content writeToFile:filePath
-                       atomically:YES
-                         encoding:NSUTF8StringEncoding
-                            error:&error]) {
-            NSLog(@"写入失败: %@", error.localizedDescription);
-        }
-    }
-}
-
-// 保持原有的pbxproj文件处理方法
-+ (void)replaceInPbxprojFile:(NSString *)pbxprojPath replaceDict:(NSDictionary *)replaceDict {
-    NSError *error = nil;
-    NSMutableString *content = [NSMutableString stringWithContentsOfFile:pbxprojPath
-                                                                encoding:NSUTF8StringEncoding
-                                                                   error:&error];
-    if (error) {
-        NSLog(@"读取失败: %@", pbxprojPath.lastPathComponent);
-        return;
-    }
-    
-    __block BOOL changesMade = NO;
-    [replaceDict enumerateKeysAndObjectsUsingBlock:^(NSString *oldName, NSString *newName, BOOL *stop) {
-        NSString *pattern = [NSString stringWithFormat:@"(?<!\\w|\\+)%@(?=\\.(?:h|m|swift|mm)\\b)",[NSRegularExpression escapedPatternForString:oldName]];
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
-                                                                               options:0
-                                                                                 error:nil];
-        if (!error) {
-            NSUInteger replacements = [regex replaceMatchesInString:content
-                                                            options:0
-                                                              range:NSMakeRange(0, content.length)
-                                                       withTemplate:newName];
-            if (replacements > 0) {
-                changesMade = YES;
-                NSLog(@"替换 %@ → %@ (%lu处)", oldName, newName, (unsigned long)replacements);
-            }
-        }
-    }];
-    
-    if (changesMade) {
-        if (![content writeToFile:pbxprojPath
-                       atomically:YES
-                         encoding:NSUTF8StringEncoding
-                            error:&error]) {
-            NSLog(@"写入失败: %@", error.localizedDescription);
-        }
-    }
-}
-
-// 文件重命名方法（保持原有）
+// 修改后的文件重命名方法，支持分类文件名
 + (void)renameFileIfNeeded:(NSString *)fullPath
               relativePath:(NSString *)relativePath
                replaceDict:(NSDictionary *)replaceDict {
@@ -214,7 +95,7 @@
     NSString *fileNameWithoutExtension = [fileName stringByDeletingPathExtension];
     NSString *fileExtension = [fileName pathExtension];
     
-    // 检查是否需要重命名（完全匹配，大小写敏感）
+    // 精确匹配文件名（完全相等）
     if (replaceDict[fileNameWithoutExtension]) {
         NSString *newFileName = [NSString stringWithFormat:@"%@.%@",
                                  replaceDict[fileNameWithoutExtension],
@@ -230,12 +111,202 @@
         } else {
             NSLog(@"❌ 重命名失败 %@: %@", fileName, error.localizedDescription);
         }
+    } else {
+        // 处理分类文件名
+        // 分类文件名格式：原类名+分类名 如: UIView+Category
+        // 需要分别检查原类名部分和分类名部分
+        
+        NSRange plusRange = [fileNameWithoutExtension rangeOfString:@"+"];
+        if (plusRange.location != NSNotFound) {
+            // 提取原类名部分（+号之前的部分）
+            NSString *originalClassName = [fileNameWithoutExtension substringToIndex:plusRange.location];
+            NSString *categoryName = [fileNameWithoutExtension substringFromIndex:plusRange.location + 1];
+            
+            // 检查原类名和分类名是否在替换字典中（精确匹配）
+            NSString *newOriginalClassName = replaceDict[originalClassName] ?: originalClassName;
+            NSString *newCategoryName = replaceDict[categoryName] ?: categoryName;
+            
+            // 如果原类名或分类名有变化，则重命名文件
+            if (![newOriginalClassName isEqualToString:originalClassName] ||
+                ![newCategoryName isEqualToString:categoryName]) {
+                
+                // 构建新的分类文件名
+                NSString *newFileNameWithoutExtension = [NSString stringWithFormat:@"%@+%@", newOriginalClassName, newCategoryName];
+                NSString *newFileName = [NSString stringWithFormat:@"%@.%@", newFileNameWithoutExtension, fileExtension];
+                NSString *newFullPath = [[fullPath stringByDeletingLastPathComponent]
+                                         stringByAppendingPathComponent:newFileName];
+                
+                NSError *error;
+                if ([[NSFileManager defaultManager] moveItemAtPath:fullPath
+                                                            toPath:newFullPath
+                                                             error:&error]) {
+                    NSLog(@"🔄 重命名分类文件: %@ -> %@", fileName, newFileName);
+                } else {
+                    NSLog(@"❌ 分类文件重命名失败 %@: %@", fileName, error.localizedDescription);
+                }
+            }
+        }
     }
 }
 
-// 判断是否应该处理该扩展名的文件
+// 改进的内容替换方法，支持精确匹配
++ (void)replaceInSourceFile:(NSString *)filePath replaceDict:(NSDictionary *)replaceDict {
+    NSError *error = nil;
+    NSMutableString *content = [NSMutableString stringWithContentsOfFile:filePath
+                                                                encoding:NSUTF8StringEncoding
+                                                                   error:&error];
+    if (error) {
+        NSLog(@"读取失败: %@", filePath.lastPathComponent);
+        return;
+    }
+    
+    __block BOOL changesMade = NO;
+    
+    // 按长度降序排序，先处理长的单词，避免部分替换问题
+    NSArray *sortedKeys = [replaceDict keysSortedByValueUsingComparator:^NSComparisonResult(NSString *key1, NSString *key2) {
+        return [@(key2.length) compare:@(key1.length)];
+    }];
+    
+    for (NSString *oldName in sortedKeys) {
+        NSString *newName = replaceDict[oldName];
+        
+        // 使用更精确的匹配模式，确保完全匹配
+        // 匹配模式：单词边界或前面是非字母数字下划线字符
+        NSString *pattern = [NSString stringWithFormat:@"(?:^|[^a-zA-Z0-9_])%@(?=$|[^a-zA-Z0-9_])",
+                            [NSRegularExpression escapedPatternForString:oldName]];
+        
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                               options:0
+                                                                                 error:nil];
+        if (regex) {
+            NSArray<NSTextCheckingResult *> *matches = [regex matchesInString:content
+                                                                      options:0
+                                                                        range:NSMakeRange(0, content.length)];
+            
+            // 反向遍历避免范围变化问题
+            for (NSInteger i = matches.count - 1; i >= 0; i--) {
+                NSTextCheckingResult *match = matches[i];
+                NSRange matchRange = match.range;
+                
+                // 检查是否是完整匹配（排除边界字符）
+                NSString *matchedString = [content substringWithRange:matchRange];
+                NSRange actualMatchRange = [matchedString rangeOfString:oldName];
+                
+                if (actualMatchRange.location != NSNotFound) {
+                    // 计算实际要替换的范围
+                    NSRange replaceRange = NSMakeRange(matchRange.location + actualMatchRange.location, oldName.length);
+                    
+                    // 执行替换
+                    [content replaceCharactersInRange:replaceRange withString:newName];
+                    changesMade = YES;
+                    NSLog(@"在 %@ 中替换内容 %@ → %@", filePath.lastPathComponent, oldName, newName);
+                }
+            }
+        }
+    }
+    
+    if (changesMade) {
+        if (![content writeToFile:filePath
+                       atomically:YES
+                         encoding:NSUTF8StringEncoding
+                            error:&error]) {
+            NSLog(@"写入失败: %@", error.localizedDescription);
+        }
+    }
+}
+
+// 改进的 .pbxproj 文件处理方法
++ (void)replaceInPbxprojFile:(NSString *)pbxprojPath replaceDict:(NSDictionary *)replaceDict {
+    NSError *error = nil;
+    NSMutableString *content = [NSMutableString stringWithContentsOfFile:pbxprojPath
+                                                                encoding:NSUTF8StringEncoding
+                                                                   error:&error];
+    if (error) {
+        NSLog(@"读取失败: %@", pbxprojPath.lastPathComponent);
+        return;
+    }
+    
+    __block BOOL changesMade = NO;
+    
+    // 按长度降序排序
+    NSArray *sortedKeys = [replaceDict keysSortedByValueUsingComparator:^NSComparisonResult(NSString *key1, NSString *key2) {
+        return [@(key2.length) compare:@(key1.length)];
+    }];
+    
+    for (NSString *oldName in sortedKeys) {
+        NSString *newName = replaceDict[oldName];
+        
+        // 精确匹配文件名模式
+        // 匹配：文件名.扩展名 或 类名+分类名.扩展名
+        NSString *pattern = [NSString stringWithFormat:@"\\b%@(?:\\.(?:h|m|mm|swift|pch)|\\+[^\\s\"]*\\.(?:h|m|mm|swift))\\b",
+                            [NSRegularExpression escapedPatternForString:oldName]];
+        
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                               options:0
+                                                                                 error:nil];
+        if (regex) {
+            NSArray<NSTextCheckingResult *> *matches = [regex matchesInString:content
+                                                                      options:0
+                                                                        range:NSMakeRange(0, content.length)];
+            
+            // 反向遍历
+            for (NSInteger i = matches.count - 1; i >= 0; i--) {
+                NSTextCheckingResult *match = matches[i];
+                NSString *matchedString = [content substringWithRange:match.range];
+                NSString *replacedString = [self replaceFileNameInString:matchedString oldName:oldName newName:newName];
+                
+                if (![matchedString isEqualToString:replacedString]) {
+                    [content replaceCharactersInRange:match.range withString:replacedString];
+                    changesMade = YES;
+                    NSLog(@"在 %@ 中替换项目引用: %@ → %@", pbxprojPath.lastPathComponent, matchedString, replacedString);
+                }
+            }
+        }
+    }
+    
+    if (changesMade) {
+        if (![content writeToFile:pbxprojPath
+                       atomically:YES
+                         encoding:NSUTF8StringEncoding
+                            error:&error]) {
+            NSLog(@"写入失败: %@", error.localizedDescription);
+        } else {
+            NSLog(@"✅ 项目文件更新成功: %@", pbxprojPath.lastPathComponent);
+        }
+    }
+}
+
+// 辅助方法：替换文件名中的类名部分
++ (NSString *)replaceFileNameInString:(NSString *)fileNameString
+                             oldName:(NSString *)oldName
+                             newName:(NSString *)newName {
+    
+    NSString *fileExtension = [fileNameString pathExtension];
+    NSString *fileNameWithoutExtension = [fileNameString stringByDeletingPathExtension];
+    
+    // 检查是否是分类文件
+    NSRange plusRange = [fileNameWithoutExtension rangeOfString:@"+"];
+    if (plusRange.location != NSNotFound) {
+        // 分类文件：原类名+分类名
+        NSString *originalClassName = [fileNameWithoutExtension substringToIndex:plusRange.location];
+        NSString *categoryName = [fileNameWithoutExtension substringFromIndex:plusRange.location + 1];
+        
+        // 精确匹配替换
+        NSString *newOriginalClassName = [originalClassName isEqualToString:oldName] ? newName : originalClassName;
+        NSString *newCategoryName = [categoryName isEqualToString:oldName] ? newName : categoryName;
+        
+        return [NSString stringWithFormat:@"%@+%@.%@", newOriginalClassName, newCategoryName, fileExtension];
+    } else {
+        // 普通文件 - 精确匹配
+        if ([fileNameWithoutExtension isEqualToString:oldName]) {
+            return [NSString stringWithFormat:@"%@.%@", newName, fileExtension];
+        }
+    }
+    
+    return fileNameString;
+}
+
 + (BOOL)shouldProcessFileWithExtension:(NSString *)extension {
-    // 修正：移除.pch前的点号
     NSArray *allowedExtensions = @[@"h", @"m", @"mm", @"swift", @"pch"];
     return [allowedExtensions containsObject:extension.lowercaseString];
 }
