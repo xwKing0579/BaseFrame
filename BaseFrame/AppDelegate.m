@@ -53,14 +53,14 @@
 //    NSArray *constantList = [BFConstantString findMacrosInProjectPath:directory];
 //    NSLog(@"%@",constantList);
     
-//        NSDictionary *dict = [BFConstantString mapConstantStringDict103];
-//        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
-//        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
-//        for (NSString *key in dict.allKeys) {
-//            if ([BFConfuseMethod.sysMethodList containsObject:key]){
-//                NSLog(@"========+>>>>>> 白名单  %@",key);
-//            }
-//        }
+        NSDictionary *dict = [BFConstantString mapConstantStringDict103];
+        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
+        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+        for (NSString *key in dict.allKeys) {
+            if ([BFConfuseMethod.sysMethodList containsObject:key]){
+                NSLog(@"========+>>>>>> 白名单  %@",key);
+            }
+        }
     
 //    NSArray *wordList = [BFConfuseManager detectStringsInDirectory:directory targetStrings:BFConfuseMethod.mapMethodDict103.allKeys];
 //    NSLog(@"%@",wordList);
@@ -88,7 +88,7 @@
 //            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
     //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
-    //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict102];
+//        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict103];
     ////    [BFConstantString replaceStringsInProjectAtPath:directory];
     //    [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict4];
     //    [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict4];
