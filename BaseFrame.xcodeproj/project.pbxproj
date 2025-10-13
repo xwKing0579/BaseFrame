@@ -14,6 +14,8 @@
 		F8236FBD2E3CBCF000E1195A /* method_jingyuege.json in Resources */ = {isa = PBXBuildFile; fileRef = F8236FBC2E3CBCF000E1195A /* method_jingyuege.json */; };
 		F83080D02E7BF89500B44C27 /* className_yueyi.json in Resources */ = {isa = PBXBuildFile; fileRef = F83080CF2E7BF89500B44C27 /* className_yueyi.json */; };
 		F83202042E28894600FA6F2E /* directory.json in Resources */ = {isa = PBXBuildFile; fileRef = F83202032E28894600FA6F2E /* directory.json */; };
+		F832F05C2E9CED64009C950A /* directory_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F832F05B2E9CED64009C950A /* directory_yueyi 3.json */; };
+		F832F05F2E9CF4BD009C950A /* imageName_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F832F05E2E9CF4BD009C950A /* imageName_yueyi 3.json */; };
 		F837404D2E371D4900126BDD /* className_mapLoan.json in Resources */ = {isa = PBXBuildFile; fileRef = F837404C2E371D4900126BDD /* className_mapLoan.json */; };
 		F83740502E371D7400126BDD /* method_mapLoan.json in Resources */ = {isa = PBXBuildFile; fileRef = F837404F2E371D7400126BDD /* method_mapLoan.json */; };
 		F84A37992E98EB7400A33C5D /* constantString_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */; };
@@ -245,6 +247,8 @@
 		F8236FBC2E3CBCF000E1195A /* method_jingyuege.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = method_jingyuege.json; sourceTree = "<group>"; };
 		F83080CF2E7BF89500B44C27 /* className_yueyi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = className_yueyi.json; sourceTree = "<group>"; };
 		F83202032E28894600FA6F2E /* directory.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = directory.json; sourceTree = "<group>"; };
+		F832F05B2E9CED64009C950A /* directory_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "directory_yueyi 3.json"; sourceTree = "<group>"; };
+		F832F05E2E9CF4BD009C950A /* imageName_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "imageName_yueyi 3.json"; sourceTree = "<group>"; };
 		F837404C2E371D4900126BDD /* className_mapLoan.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = className_mapLoan.json; sourceTree = "<group>"; };
 		F837404F2E371D7400126BDD /* method_mapLoan.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = method_mapLoan.json; sourceTree = "<group>"; };
 		F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "constantString_yueyi 3.json"; sourceTree = "<group>"; };
@@ -664,6 +668,8 @@
 		F83080CC2E7BF87A00B44C27 /* 社交 */ = {
 			isa = PBXGroup;
 			children = (
+				F832F05D2E9CF4B9009C950A /* Image */,
+				F832F05A2E9CED57009C950A /* Directory */,
 				F84A379A2E99038900A33C5D /* Model */,
 				F84A37952E98EB5A00A33C5D /* ConstantString */,
 				F86C2ACC2E8A1D510088E1F0 /* set */,
@@ -721,6 +727,22 @@
 				F8A233D22E73BCCC00550161 /* className_jingyuege.json */,
 			);
 			path = File;
+			sourceTree = "<group>";
+		};
+		F832F05A2E9CED57009C950A /* Directory */ = {
+			isa = PBXGroup;
+			children = (
+				F832F05B2E9CED64009C950A /* directory_yueyi 3.json */,
+			);
+			path = Directory;
+			sourceTree = "<group>";
+		};
+		F832F05D2E9CF4B9009C950A /* Image */ = {
+			isa = PBXGroup;
+			children = (
+				F832F05E2E9CF4BD009C950A /* imageName_yueyi 3.json */,
+			);
+			path = Image;
 			sourceTree = "<group>";
 		};
 		F83740492E371D2A00126BDD /* 小贷 */ = {
@@ -1700,7 +1722,9 @@
 				F8B3C3A32E4624C200EAC3B8 /* imageName.json in Resources */,
 				F8D162622E2F5FD600B4A4E0 /* method_wsg.json in Resources */,
 				F8D887242E39F3BC00062BA3 /* model.json in Resources */,
+				F832F05C2E9CED64009C950A /* directory_yueyi 3.json in Resources */,
 				F837404D2E371D4900126BDD /* className_mapLoan.json in Resources */,
+				F832F05F2E9CF4BD009C950A /* imageName_yueyi 3.json in Resources */,
 				F8D162642E2F603A00B4A4E0 /* method_xixi.json in Resources */,
 				F8642C6B2E8582FD00290D17 /* className_yueyi 2.json in Resources */,
 				F8A233D32E73BCCC00550161 /* className_jingyuege.json in Resources */,

@@ -27,6 +27,10 @@
     return [self parseModuleMappingJSON:@"imageName_jingyuege"];
 }
 
++ (NSDictionary *)mapImageDict103{
+    return [self parseModuleMappingJSON:@"imageName_yueyi 3"];
+}
+
 + (void)renameAssetsInDirectory:(NSString *)directory{
     NSFileManager *fm = [NSFileManager defaultManager];
     NSError *error = nil;

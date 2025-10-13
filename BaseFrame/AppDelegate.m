@@ -53,17 +53,23 @@
 //    NSArray *constantList = [BFConstantString findMacrosInProjectPath:directory];
 //    NSLog(@"%@",constantList);
     
-        NSDictionary *dict = [BFConstantString mapConstantStringDict103];
-        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
-        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
-        for (NSString *key in dict.allKeys) {
-            if ([BFConfuseMethod.sysMethodList containsObject:key]){
-                NSLog(@"========+>>>>>> 白名单  %@",key);
-            }
-        }
+//        NSDictionary *dict = [BFConstantString mapConstantStringDict103];
+//        [BFConfuseMethod detectMultipleSettersInProject:directory propertyNames:dict.allKeys excludeFolders:@[@"Pods"]];
+//        NSLog(@"%ld - %ld",dict.allKeys.count, [NSMutableSet setWithArray:dict.allKeys].allObjects.count);
+//        for (NSString *key in dict.allKeys) {
+//            if ([BFConfuseMethod.sysMethodList containsObject:key]){
+//                NSLog(@"========+>>>>>> 白名单  %@",key);
+//            }
+//        }
     
 //    NSArray *wordList = [BFConfuseManager detectStringsInDirectory:directory targetStrings:BFConfuseMethod.mapMethodDict103.allKeys];
 //    NSLog(@"%@",wordList);
+    
+//    NSArray *list = @[@"qmuictl_",@"qmui_",@"qbt_",@"qimgv_",@"qwsm_",@"qcl_",@"qmuiTheme_"];
+//    NSLog(@"%@",[BFConfuseManager searchFilesInDirectory:directory matchingPrefixes:list]);
+    
+    NSArray *imageList = [BFConfuseImage allAssetFilenamesInProject:directory];
+    NSLog(@"%@",imageList);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -81,17 +87,17 @@
 //    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
     
     
-    //    [BFConfuseProject renameProjectAtPath:directory oldName:@"DeepBooks" newName:@"YueGeJing"];
-    //    [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict2];
+//        [BFConfuseProject renameProjectAtPath:directory oldName:@"YueYue" newName:@"XingYue"];
+//        [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict103];
 //          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict103 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
 //        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping103];
 //            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
     //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
 //        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict103];
-    ////    [BFConstantString replaceStringsInProjectAtPath:directory];
-    //    [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict4];
-    //    [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict4];
+//        [BFConstantString replaceStringsInProjectAtPath:directory];
+//        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict103];
+//        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict103];
     //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
     //    [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:33];
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];

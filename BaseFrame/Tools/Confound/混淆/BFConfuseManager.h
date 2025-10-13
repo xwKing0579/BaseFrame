@@ -89,6 +89,18 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSArray<NSString *> *)detectStringsInDirectory:(NSString *)directoryPath
                                   targetStrings:(NSArray<NSString *> *)targetStrings;
 
+
+
+
+/**
+ 在指定目录中搜索包含特定前缀字符串的文件
+
+ @param directoryPath 要搜索的目录路径
+ @param prefixes 要匹配的字符串前缀数组
+ @return 包含所有匹配字符串的集合
+ */
++ (NSSet<NSString *> *)searchFilesInDirectory:(NSString *)directoryPath
+                             matchingPrefixes:(NSArray<NSString *> *)prefixes;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)dict;
 + (NSDictionary *)dict1;
 + (NSDictionary *)dict2;
++ (NSDictionary *)dict103;
 @end
 
 NS_ASSUME_NONNULL_END

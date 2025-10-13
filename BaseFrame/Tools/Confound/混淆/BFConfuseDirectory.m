@@ -21,6 +21,10 @@
     return [self parseModuleMappingJSON:@"directory_jingyuege"];
 }
 
++ (NSDictionary *)dict103{
+    return [self parseModuleMappingJSON:@"directory_yueyi 3"];
+}
+
 + (void)processProjectAtPath:(NSString *)projectPath
                renameMapping:(NSDictionary<NSString *, NSString *> *)mapping {
     

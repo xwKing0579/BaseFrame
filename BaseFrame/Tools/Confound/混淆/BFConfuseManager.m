@@ -717,4 +717,208 @@
     }
     return absolutePath;
 }
+
+
+
+
+/**
+ 在指定目录中搜索包含特定前缀字符串的文件
+
+ @param directoryPath 要搜索的目录路径
+ @param prefixes 要匹配的字符串前缀数组
+ @return 包含所有匹配字符串的集合
+ */
++ (NSSet<NSString *> *)searchFilesInDirectory:(NSString *)directoryPath
+                          matchingPrefixes:(NSArray<NSString *> *)prefixes {
+    
+    NSMutableSet<NSString *> *matchedStrings = [NSMutableSet set];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 检查目录是否存在
+    BOOL isDirectory;
+    if (![fileManager fileExistsAtPath:directoryPath isDirectory:&isDirectory] || !isDirectory) {
+        NSLog(@"错误: 目录不存在或不是目录: %@", directoryPath);
+        return matchedStrings;
+    }
+    
+    // 创建目录枚举器
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:directoryPath];
+    NSString *item;
+    
+    while ((item = [enumerator nextObject])) {
+        @autoreleasepool {
+            NSString *fullPath = [directoryPath stringByAppendingPathComponent:item];
+            
+            // 检查是否为目录
+            BOOL itemIsDirectory;
+            [fileManager fileExistsAtPath:fullPath isDirectory:&itemIsDirectory];
+            
+            if (!itemIsDirectory) {
+                // 只搜索文件
+                if ([self shouldSearchFile:item]) {
+                    NSSet<NSString *> *fileMatches = [self searchStringsInFile:fullPath
+                                                            matchingPrefixes:prefixes];
+                    [matchedStrings unionSet:fileMatches];
+                }
+            }
+        }
+    }
+    
+    return [matchedStrings copy];
+}
+
+/**
+ 判断是否应该搜索该文件
+ */
++ (BOOL)shouldSearchFile:(NSString *)fileName {
+    // 可以根据需要添加更多的文件类型
+    NSArray *supportedExtensions = @[@"m", @"mm", @"h", @"swift", @"c", @"cpp", @"xml", @"json", @"plist", @"xib", @"storyboard", @"strings"];
+    NSString *fileExtension = [[fileName pathExtension] lowercaseString];
+    return [supportedExtensions containsObject:fileExtension];
+}
+
+/**
+ 在单个文件中搜索匹配的字符串
+ */
++ (NSSet<NSString *> *)searchStringsInFile:(NSString *)filePath
+                        matchingPrefixes:(NSArray<NSString *> *)prefixes {
+    
+    NSMutableSet<NSString *> *matches = [NSMutableSet set];
+    NSError *error;
+    NSString *fileContent = [NSString stringWithContentsOfFile:filePath
+                                                      encoding:NSUTF8StringEncoding
+                                                         error:&error];
+
+    if (!fileContent) {
+        return matches;
+    }
+    
+    // 对每个前缀进行搜索
+    for (NSString *prefix in prefixes) {
+        NSSet<NSString *> *prefixMatches = [self extractIdentifiersWithPrefix:prefix fromString:fileContent];
+        [matches unionSet:prefixMatches];
+    }
+    
+    return matches;
+}
+
+/**
+ 从字符串中提取以指定前缀开头的完整标识符
+ */
++ (NSSet<NSString *> *)extractIdentifiersWithPrefix:(NSString *)prefix fromString:(NSString *)content {
+    NSMutableSet<NSString *> *identifiers = [NSMutableSet set];
+    
+    // 找到所有包含前缀的位置
+    NSRange searchRange = NSMakeRange(0, content.length);
+    while (searchRange.location < content.length) {
+        NSRange prefixRange = [content rangeOfString:prefix options:0 range:searchRange];
+        if (prefixRange.location == NSNotFound) {
+            break;
+        }
+        
+        // 从前缀位置开始，向后查找完整的标识符
+        NSString *identifier = [self extractIdentifierAtLocation:prefixRange.location inString:content];
+        if (identifier && [identifier hasPrefix:prefix]) {
+            [identifiers addObject:identifier];
+        }
+        
+        // 移动到下一个位置继续搜索
+        searchRange.location = prefixRange.location + prefixRange.length;
+        searchRange.length = content.length - searchRange.location;
+    }
+    
+    return identifiers;
+}
+
+/**
+ 从指定位置提取完整的标识符
+ */
++ (NSString *)extractIdentifierAtLocation:(NSUInteger)location inString:(NSString *)string {
+    if (location >= string.length) {
+        return nil;
+    }
+    
+    // 向前找到标识符的开始位置
+    NSUInteger start = location;
+    while (start > 0) {
+        unichar prevChar = [string characterAtIndex:start - 1];
+        if (![self isValidIdentifierCharacter:prevChar] && prevChar != '_') {
+            break;
+        }
+        start--;
+    }
+    
+    // 向后找到标识符的结束位置
+    NSUInteger end = location;
+    while (end < string.length) {
+        unichar nextChar = [string characterAtIndex:end];
+        if (![self isValidIdentifierCharacter:nextChar]) {
+            break;
+        }
+        end++;
+    }
+    
+    if (start < end) {
+        NSRange identifierRange = NSMakeRange(start, end - start);
+        return [string substringWithRange:identifierRange];
+    }
+    
+    return nil;
+}
+
+/**
+ 判断字符是否是有效的标识符字符
+ */
++ (BOOL)isValidIdentifierCharacter:(unichar)character {
+    // 标识符可以包含字母、数字、下划线
+    return (character >= 'a' && character <= 'z') ||
+           (character >= 'A' && character <= 'Z') ||
+           (character >= '0' && character <= '9') ||
+           (character == '_');
+}
+
+/**
+ 更精确的搜索方法：使用正则表达式直接匹配标识符
+ */
++ (NSSet<NSString *> *)searchStringsInFileWithRegex:(NSString *)filePath
+                                 matchingPrefixes:(NSArray<NSString *> *)prefixes {
+    
+    NSMutableSet<NSString *> *matches = [NSMutableSet set];
+    NSError *error;
+    NSString *fileContent = [NSString stringWithContentsOfFile:filePath
+                                                      encoding:NSUTF8StringEncoding
+                                                         error:&error];
+    
+    if (error || !fileContent) {
+        return matches;
+    }
+    
+    // 匹配完整的标识符（以字母或下划线开头，包含字母、数字、下划线）
+    NSString *pattern = @"[a-zA-Z_][a-zA-Z0-9_]*";
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                           options:0
+                                                                             error:&error];
+    
+    if (error) {
+        return matches;
+    }
+    
+    NSArray<NSTextCheckingResult *> *results = [regex matchesInString:fileContent
+                                                              options:0
+                                                                range:NSMakeRange(0, fileContent.length)];
+    
+    for (NSTextCheckingResult *result in results) {
+        NSString *identifier = [fileContent substringWithRange:result.range];
+        
+        // 检查是否匹配任何前缀
+        for (NSString *prefix in prefixes) {
+            if ([identifier hasPrefix:prefix]) {
+                [matches addObject:identifier];
+                break;
+            }
+        }
+    }
+    
+    return matches;
+}
 @end
