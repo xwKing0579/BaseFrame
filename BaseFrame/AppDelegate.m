@@ -68,8 +68,10 @@
 //    NSArray *list = @[@"qmuictl_",@"qmui_",@"qbt_",@"qimgv_",@"qwsm_",@"qcl_",@"qmuiTheme_"];
 //    NSLog(@"%@",[BFConfuseManager searchFilesInDirectory:directory matchingPrefixes:list]);
     
-    NSArray *imageList = [BFConfuseImage allAssetFilenamesInProject:directory];
-    NSLog(@"%@",imageList);
+//    NSArray *imageList = [BFConfuseImage allAssetFilenamesInProject:directory];
+//    NSLog(@"%@",imageList);
+    
+//    [BFConfuseImage replaceImagesFromDirectoryA:@"/Users/wangxiangwei/Desktop/大图" toDirectoryB:directory];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -77,7 +79,7 @@
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
     
     
-    NSString *directory = @"/Users/wangxiangwei/Desktop/社交/越轻盈_副本";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/yayj_副本";
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
     //    [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具

@@ -578,4 +578,298 @@
 
 
 
+// 替换两个目录中的同名图片
++ (void)replaceImagesFromDirectoryA:(NSString *)dirAPath
+                      toDirectoryB:(NSString *)dirBPath {
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 检查目录是否存在
+    if (![fileManager fileExistsAtPath:dirAPath]) {
+        NSLog(@"❌ 目录A不存在: %@", dirAPath);
+        return;
+    }
+    
+    if (![fileManager fileExistsAtPath:dirBPath]) {
+        NSLog(@"❌ 目录B不存在: %@", dirBPath);
+        return;
+    }
+    
+    NSLog(@"📁 目录A: %@", dirAPath);
+    NSLog(@"📁 目录B: %@", dirBPath);
+    
+    // 获取目录A中的所有图片文件
+    NSError *error = nil;
+    NSArray *dirAContents = [fileManager contentsOfDirectoryAtPath:dirAPath error:&error];
+    if (error) {
+        NSLog(@"❌ 读取目录A失败: %@", error.localizedDescription);
+        return;
+    }
+    
+    // 过滤出图片文件并打印所有图片
+    NSArray *imageExtensions = @[@"png", @"jpg", @"jpeg", @"gif", @"bmp", @"tiff", @"webp"];
+    NSMutableArray *imageFiles = [NSMutableArray array];
+    
+    NSLog(@"\n📋 目录A中的图片文件:");
+    for (NSString *file in dirAContents) {
+        NSString *extension = [[file pathExtension] lowercaseString];
+        if ([imageExtensions containsObject:extension]) {
+            [imageFiles addObject:file];
+            NSLog(@"   - %@", file);
+        }
+    }
+    
+    NSLog(@"📁 目录A中找到 %lu 个图片文件", (unsigned long)imageFiles.count);
+    
+    // 在目录B中查找所有的Assets.xcassets（排除Pods目录）
+    NSArray *assetsCatalogs = [self findAllAssetsCatalogsInDirectory:dirBPath];
+    
+    if (assetsCatalogs.count == 0) {
+        NSLog(@"❌ 在目录B中未找到Assets.xcassets");
+        return;
+    }
+    
+    NSLog(@"\n📋 找到的Assets.xcassets目录:");
+    for (NSString *assetsPath in assetsCatalogs) {
+        NSLog(@"   - %@", [self relativePath:assetsPath fromBase:dirBPath]);
+    }
+    
+    NSInteger totalReplaced = 0;
+    
+    // 遍历所有找到的Assets.xcassets目录
+    for (NSString *assetsCatalogPath in assetsCatalogs) {
+        NSLog(@"\n🔍 处理Assets.xcassets: %@", [self relativePath:assetsCatalogPath fromBase:dirBPath]);
+        
+        NSInteger replacedInThisCatalog = [self processAssetsCatalog:assetsCatalogPath
+                                                  withImagesFromDirA:dirAPath
+                                                          imageFiles:imageFiles];
+        totalReplaced += replacedInThisCatalog;
+    }
+    
+    NSLog(@"\n📊 替换完成!");
+    NSLog(@"✅ 总共替换了 %ld 个图片", (long)totalReplaced);
+}
+
++ (NSString *)relativePath:(NSString *)path fromBase:(NSString *)basePath {
+    if ([path hasPrefix:basePath]) {
+        NSString *relativePath = [path substringFromIndex:basePath.length];
+        if ([relativePath hasPrefix:@"/"]) {
+            relativePath = [relativePath substringFromIndex:1];
+        }
+        return relativePath;
+    }
+    return path;
+}
+
++ (NSArray *)findAllAssetsCatalogsInDirectory:(NSString *)directory {
+    NSMutableArray *assetsCatalogs = [NSMutableArray array];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:directory];
+    NSString *file;
+    
+    while ((file = [enumerator nextObject])) {
+        // 跳过Pods目录
+        if ([file containsString:@"/Pods/"] || [file hasPrefix:@"Pods/"]) {
+            [enumerator skipDescendants];
+            continue;
+        }
+        
+        // 检查是否是Assets.xcassets目录
+        if ([[file lastPathComponent] isEqualToString:@"Assets.xcassets"]) {
+            NSString *assetsPath = [directory stringByAppendingPathComponent:file];
+            [assetsCatalogs addObject:assetsPath];
+        }
+    }
+    
+    return [assetsCatalogs copy];
+}
+
++ (NSInteger)processAssetsCatalog:(NSString *)assetsCatalogPath
+               withImagesFromDirA:(NSString *)dirAPath
+                       imageFiles:(NSArray *)imageFiles {
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    
+    // 获取Assets.xcassets中的所有内容
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:assetsCatalogPath error:&error];
+    if (error) {
+        NSLog(@"❌ 读取Assets.xcassets失败: %@", assetsCatalogPath);
+        return 0;
+    }
+    
+    NSInteger replacedCount = 0;
+    
+    // 遍历Assets.xcassets中的所有项目
+    for (NSString *item in contents) {
+        NSString *itemPath = [assetsCatalogPath stringByAppendingPathComponent:item];
+        
+        BOOL isDirectory;
+        if ([fileManager fileExistsAtPath:itemPath isDirectory:&isDirectory] && isDirectory) {
+            if ([item hasSuffix:@".imageset"]) {
+                // 处理图片集
+                replacedCount += [self processImageSet:itemPath
+                                    withImagesFromDirA:dirAPath
+                                            imageFiles:imageFiles];
+            } else {
+                // 递归处理子目录
+                replacedCount += [self findAndProcessImageSetsInDirectory:itemPath
+                                                       withImagesFromDirA:dirAPath
+                                                               imageFiles:imageFiles];
+            }
+        }
+    }
+    
+    return replacedCount;
+}
+
++ (NSInteger)findAndProcessImageSetsInDirectory:(NSString *)directory
+                             withImagesFromDirA:(NSString *)dirAPath
+                                     imageFiles:(NSArray *)imageFiles {
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSInteger replacedCount = 0;
+    
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:directory];
+    NSString *file;
+    
+    while ((file = [enumerator nextObject])) {
+        if ([file hasSuffix:@".imageset"]) {
+            NSString *imageSetPath = [directory stringByAppendingPathComponent:file];
+            replacedCount += [self processImageSet:imageSetPath
+                                withImagesFromDirA:dirAPath
+                                        imageFiles:imageFiles];
+        }
+    }
+    
+    return replacedCount;
+}
+
++ (NSInteger)processImageSet:(NSString *)imageSetPath
+          withImagesFromDirA:(NSString *)dirAPath
+                  imageFiles:(NSArray *)imageFiles {
+    
+    // 提取图片集名称（去掉.imageset后缀）
+    NSString *imageSetName = [[imageSetPath lastPathComponent] stringByDeletingPathExtension];
+    
+    NSLog(@"\n   🔍 检查图片集: %@", imageSetName);
+    
+    // 读取Contents.json来获取实际的文件名
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSString *contentsPath = [imageSetPath stringByAppendingPathComponent:@"Contents.json"];
+    
+    if (![fileManager fileExistsAtPath:contentsPath]) {
+        NSLog(@"   ❌ Contents.json不存在");
+        return 0;
+    }
+    
+    NSData *contentsData = [NSData dataWithContentsOfFile:contentsPath];
+    if (!contentsData) {
+        NSLog(@"   ❌ 无法读取Contents.json");
+        return 0;
+    }
+    
+    NSError *jsonError = nil;
+    NSDictionary *contentsDict = [NSJSONSerialization JSONObjectWithData:contentsData
+                                                                 options:0
+                                                                   error:&jsonError];
+    if (jsonError || !contentsDict) {
+        NSLog(@"   ❌ 解析Contents.json失败");
+        return 0;
+    }
+    
+    // 获取图片信息数组
+    NSArray *images = contentsDict[@"images"];
+    if (!images) {
+        NSLog(@"   ❌ 无法获取images数组");
+        return 0;
+    }
+    
+    NSInteger replacedCount = 0;
+    
+    // 遍历Contents.json中定义的每个图片文件
+    for (NSDictionary *imageInfo in images) {
+        NSString *targetFilename = imageInfo[@"filename"];
+        if (!targetFilename) {
+            continue;
+        }
+        
+        NSLog(@"   📄 需要文件: %@", targetFilename);
+        
+        // 在目录A中查找精确匹配的文件（包括缩放后缀）
+        NSString *matchingImageFile = nil;
+        for (NSString *imageFile in imageFiles) {
+            // 精确匹配文件名（包括@2x/@3x后缀）
+            if ([imageFile isEqualToString:targetFilename]) {
+                matchingImageFile = imageFile;
+                NSLog(@"     ✅ 找到精确匹配: %@", imageFile);
+                break;
+            }
+        }
+        
+        if (matchingImageFile) {
+            // 进行替换
+            NSString *sourceImagePath = [dirAPath stringByAppendingPathComponent:matchingImageFile];
+            if ([self replaceSpecificImageInImageSet:imageSetPath
+                                    withSourceImage:sourceImagePath
+                                           filename:targetFilename]) {
+                NSLog(@"   ✅ 成功替换: %@", targetFilename);
+                replacedCount++;
+            } else {
+                NSLog(@"   ⚠️ 替换失败: %@", targetFilename);
+            }
+        } else {
+            NSLog(@"     ❌ 未找到匹配文件: %@", targetFilename);
+        }
+    }
+    
+    if (replacedCount == 0) {
+        NSLog(@"   ❌ 在此图片集中未找到任何匹配的图片");
+    }
+    
+    return replacedCount;
+}
+
+// 替换图片集中指定的图片文件
++ (BOOL)replaceSpecificImageInImageSet:(NSString *)imageSetPath
+                      withSourceImage:(NSString *)sourceImagePath
+                             filename:(NSString *)targetFilename {
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    NSString *targetImagePath = [imageSetPath stringByAppendingPathComponent:targetFilename];
+    
+    // 检查源文件是否存在
+    if (![fileManager fileExistsAtPath:sourceImagePath]) {
+        NSLog(@"   ❌ 源图片不存在: %@", sourceImagePath);
+        return NO;
+    }
+    
+    // 检查目标文件是否存在（不管是否有备份，都要替换）
+    if (![fileManager fileExistsAtPath:targetImagePath]) {
+        NSLog(@"   ❌ 目标图片不存在: %@", targetImagePath);
+        return NO;
+    }
+    
+    // 删除目标文件（强制替换）
+    NSError *removeError = nil;
+    if ([fileManager removeItemAtPath:targetImagePath error:&removeError]) {
+        NSLog(@"   🗑️ 已删除原文件: %@", targetFilename);
+    } else {
+        NSLog(@"   ⚠️ 删除原文件失败: %@", removeError.localizedDescription);
+        // 继续尝试复制，可能会覆盖
+    }
+    
+    // 复制新图片
+    NSError *copyError = nil;
+    if ([fileManager copyItemAtPath:sourceImagePath toPath:targetImagePath error:&copyError]) {
+        NSLog(@"   ✅ 成功替换文件: %@", targetFilename);
+        return YES;
+    } else {
+        NSLog(@"   ❌ 复制图片失败: %@", copyError.localizedDescription);
+        return NO;
+    }
+}
+
 @end

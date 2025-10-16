@@ -19,7 +19,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)renameImageAssetsAndCodeReferencesInProject:(NSString *)projectDirectory
                                      renameMapping:(NSDictionary<NSString *, NSString *> *)renameMapping;
 
-
+// 替换两个目录中的同名图片
++ (void)replaceImagesFromDirectoryA:(NSString *)dirAPath toDirectoryB:(NSString *)dirBPath;
 
 + (NSDictionary *)mapImageDict;
 + (NSDictionary *)mapImageDict1;
