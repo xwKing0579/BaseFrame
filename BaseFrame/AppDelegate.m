@@ -71,7 +71,7 @@
 //    NSArray *imageList = [BFConfuseImage allAssetFilenamesInProject:directory];
 //    NSLog(@"%@",imageList);
     
-//    [BFConfuseImage replaceImagesFromDirectoryA:@"/Users/wangxiangwei/Desktop/大图" toDirectoryB:directory];
+//    [BFConfuseImage replaceImagesFromDirectoryA:@"/Users/wangxiangwei/Desktop/icon调整" toDirectoryB:directory];
     
 //    [BFConfuseImage findUnusedImagesInProject:directory excludeDirs:@[] shouldDelete:YES];
 }
@@ -87,26 +87,44 @@
     //检查工具
     [self checkTool:directory];
     
-    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
+
 //    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
     
     
 //        [BFConfuseProject renameProjectAtPath:directory oldName:@"YueYue" newName:@"XingYue"];
+    
 //        [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict103];
+    
 //          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict103 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
+    
 //        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping103];
+    
 //            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
+    
     //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
+    
     //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
+    
 //        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict103];
+    
 //        [BFConstantString replaceStringsInProjectAtPath:directory];
 //        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict103];
+    
 //        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict103];
+    
     //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
+    
 //        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:18];
+    
+      //插入随机方法
+    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
+    
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
+    
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
+    
     //    [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
+    
     /*
      
      //检测混淆命名是否重复，丢失等问题

@@ -8,6 +8,7 @@
 #import "BFConfuseMethod.h"
 #import "BFConfuseProperty.h"
 #import "BFConfuseManager.h"
+#import "BFWordsRackTool.h"
 static NSArray *_propertyList = @[];
 @implementation BFConfuseMethod
 
@@ -44,7 +45,7 @@ static NSArray *_propertyList = @[];
     NSArray *list = [self parseModuleArrayJSON:@"method_yueyi 2"].allObjects;
     NSMutableArray *array = [NSMutableArray array];
     
-
+    
     for (NSString *obj in list) {
         if (![[self sysMethodList] containsObject:obj] && ![obj hasSuffix:@"Button"] && ![obj hasSuffix:@"Btn"] && ![obj hasSuffix:@"View"] && ![obj hasSuffix:@"Label"] && ![obj hasSuffix:@"ImageView"] && ![obj hasSuffix:@"ImgView"] && ![obj hasSuffix:@"Control"]){
             [array addObject:obj];
@@ -562,7 +563,7 @@ static NSArray *_propertyList = @[];
                          propertyNames:(NSArray *)propertyNames
                         excludeFolders:(NSArray *)excludeFolders {
     
-
+    
     for (NSString *propertyName in propertyNames) {
         [self detectSetterMethodInProject:projectPath
                              propertyName:propertyName
@@ -572,9 +573,9 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)getContextFromContent:(NSString *)content
-                           atRange:(NSRange)targetRange
-                       linesBefore:(NSUInteger)before
-                        linesAfter:(NSUInteger)after {
+                            atRange:(NSRange)targetRange
+                        linesBefore:(NSUInteger)before
+                         linesAfter:(NSUInteger)after {
     
     __block NSUInteger targetLineNumber = 0;
     __block NSUInteger currentIndex = 0;
@@ -613,7 +614,7 @@ static NSArray *_propertyList = @[];
     NSString *capitalizedPropertyName = [propertyName stringByReplacingCharactersInRange:NSMakeRange(0,1)
                                                                               withString:[[propertyName substringToIndex:1] uppercaseString]];
     NSString *setterName = [NSString stringWithFormat:@"set%@:", capitalizedPropertyName];
-
+    
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:projectPath];
     
@@ -636,8 +637,8 @@ static NSArray *_propertyList = @[];
             
             NSError *error;
             NSString *fileContent = [NSString stringWithContentsOfFile:fullPath
-                                                             encoding:NSUTF8StringEncoding
-                                                                error:&error];
+                                                              encoding:NSUTF8StringEncoding
+                                                                 error:&error];
             if (setterName && [fileContent containsString:setterName]) {
                 NSLog(@"✅ 在文件中找到: %@", filePath);
                 NSLog(@"📄 上下文:\n%@", propertyName);
@@ -733,7 +734,7 @@ static NSArray *_propertyList = @[];
         }
         
         // 随机决定是否在这个方法中插入代码（60%概率）
-        if (arc4random_uniform(100) < 60) {
+        if (arc4random_uniform(100) < 80) {
             if ([self injectRandomCodeInMethodRange:methodRange content:content]) {
                 injectionCount++;
             }
@@ -816,78 +817,34 @@ static NSArray *_propertyList = @[];
             return NO;
         }
         
-        // 找到方法体的开始和结束位置
-        NSRange openBraceRange = [methodContent rangeOfString:@"{"];
-        NSRange closeBraceRange = [methodContent rangeOfString:@"}" options:NSBackwardsSearch];
+        // 找到所有有效的插入位置（分号位置）
+        NSArray *insertionPoints = [self findValidInsertionPointsInMethodContent:methodContent];
         
-        if (openBraceRange.location == NSNotFound || closeBraceRange.location == NSNotFound) {
+        if (insertionPoints.count == 0) {
             return NO;
         }
         
-        // 计算方法体的实际范围
-        NSUInteger bodyStart = openBraceRange.location + 1;
-        NSUInteger bodyEnd = closeBraceRange.location;
+        // 随机选择一个插入位置
+        NSUInteger randomIndex = arc4random_uniform((uint32_t)insertionPoints.count);
+        NSDictionary *insertionPoint = insertionPoints[randomIndex];
         
-        if (bodyStart >= bodyEnd) {
-            return NO;
-        }
+        NSUInteger localSemicolonPosition = [insertionPoint[@"position"] unsignedIntegerValue];
+        NSString *indent = insertionPoint[@"indent"];
         
-        // 提取方法体
-        NSString *methodBody = [methodContent substringWithRange:NSMakeRange(bodyStart, bodyEnd - bodyStart)];
-        
-        // 按行分割方法体
-        NSArray *lines = [methodBody componentsSeparatedByString:@"\n"];
-        if (lines.count <= 1) {
-            return NO;
-        }
-        
-        // 找到有效的代码行
-        NSMutableArray *validLines = [NSMutableArray array];
-        NSMutableArray *linePositions = [NSMutableArray array];
-        
-        NSUInteger currentPosition = bodyStart;
-        for (NSString *line in lines) {
-            NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-            
-            // 跳过空行、注释和特殊标记
-            if (trimmedLine.length > 0 &&
-                ![trimmedLine hasPrefix:@"//"] &&
-                ![trimmedLine hasPrefix:@"/*"] &&
-                ![trimmedLine hasPrefix:@"*"] &&
-                ![trimmedLine isEqualToString:@"}"] &&
-                ![trimmedLine hasSuffix:@"{"] &&
-                ![trimmedLine hasPrefix:@"@"] &&
-                ![trimmedLine hasPrefix:@"#"] &&
-                ![trimmedLine hasPrefix:@"return"] && // 避免在return语句后插入
-                ![trimmedLine hasPrefix:@"break"] && // 避免在break后插入
-                ![trimmedLine hasPrefix:@"continue"] && // 避免在continue后插入
-                ![trimmedLine hasPrefix:@"case"] && // 避免在case语句中插入
-                ![trimmedLine hasPrefix:@"default"] && // 避免在default语句中插入
-                ![trimmedLine containsString:@"switch"]) { // 避免在switch语句附近插入
-                
-                [validLines addObject:line];
-                [linePositions addObject:@(currentPosition)];
-            }
-            currentPosition += line.length + 1; // +1 for newline
-        }
-        
-        if (validLines.count == 0) {
-            return NO;
-        }
-        
-        // 随机选择插入位置
-        NSUInteger randomIndex = arc4random_uniform((uint32_t)validLines.count);
-        NSUInteger insertPosition = [linePositions[randomIndex] unsignedIntegerValue];
-        
-        // 获取当前行的缩进
-        NSString *currentLine = validLines[randomIndex];
-        NSString *indent = [self extractIndentFromLine:currentLine];
-        
-        // 生成随机代码（避免生成 switch 语句）
+        // 生成随机代码
         NSString *randomCode = [self generateRandomCodeWithIndent:indent];
         
-        // 在原始内容中的实际位置
-        NSUInteger actualPosition = methodRange.location + insertPosition;
+        // 计算在原始内容中的实际位置
+        NSUInteger actualPosition = methodRange.location + localSemicolonPosition + 1; // +1 表示在分号之后
+        
+        // 验证插入位置是否正确（前一个字符应该是分号）
+        if (actualPosition > 0 && actualPosition <= content.length) {
+            unichar previousChar = [content characterAtIndex:actualPosition - 1];
+            if (previousChar != ';') {
+                NSLog(@"❌ 插入位置错误：前一个字符不是分号，而是 '%c'", previousChar);
+                return NO;
+            }
+        }
         
         // 插入随机代码
         [content insertString:randomCode atIndex:actualPosition];
@@ -900,6 +857,168 @@ static NSArray *_propertyList = @[];
         NSLog(@"❌ 插入随机代码失败: %@", exception);
         return NO;
     }
+}
+
++ (NSArray *)findValidInsertionPointsInMethodContent:(NSString *)methodContent {
+    NSMutableArray *insertionPoints = [NSMutableArray array];
+    
+    // 找到方法体的开始和结束位置
+    NSRange openBraceRange = [methodContent rangeOfString:@"{"];
+    NSRange closeBraceRange = [methodContent rangeOfString:@"}" options:NSBackwardsSearch];
+    
+    if (openBraceRange.location == NSNotFound || closeBraceRange.location == NSNotFound) {
+        return insertionPoints;
+    }
+    
+    // 计算方法体的实际范围
+    NSUInteger bodyStart = openBraceRange.location + 1;
+    NSUInteger bodyEnd = closeBraceRange.location;
+    
+    if (bodyStart >= bodyEnd) {
+        return insertionPoints;
+    }
+    
+    // 提取方法体
+    NSString *methodBody = [methodContent substringWithRange:NSMakeRange(bodyStart, bodyEnd - bodyStart)];
+    
+    // 使用更精确的方法找到所有分号位置
+    NSUInteger position = 0;
+    while (position < methodBody.length) {
+        // 找到下一个分号
+        NSRange semicolonRange = [methodBody rangeOfString:@";" options:0 range:NSMakeRange(position, methodBody.length - position)];
+        if (semicolonRange.location == NSNotFound) {
+            break;
+        }
+        
+        // 检查这个分号是否在有效的位置
+        if ([self isValidSemicolonPosition:semicolonRange.location inMethodBody:methodBody]) {
+            // 获取当前行的缩进
+            NSString *indent = [self getIndentAtPosition:semicolonRange.location inMethodBody:methodBody];
+            
+            [insertionPoints addObject:@{
+                @"position": @(bodyStart + semicolonRange.location),
+                @"indent": indent ?: @""
+            }];
+        }
+        
+        position = semicolonRange.location + semicolonRange.length;
+    }
+    
+    return insertionPoints;
+}
+
++ (BOOL)isValidSemicolonPosition:(NSUInteger)position inMethodBody:(NSString *)methodBody {
+    // 提取分号所在的行
+    NSString *line = [self getLineContainingPosition:position inString:methodBody];
+    NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    // 跳过注释
+    if ([trimmedLine hasPrefix:@"//"] ||
+        [trimmedLine hasPrefix:@"/*"] ||
+        [trimmedLine hasPrefix:@"*"] ||
+        [trimmedLine hasSuffix:@"*/"]) {
+        return NO;
+    }
+    
+    // 跳过控制流语句
+    NSArray *controlFlowKeywords = @[
+        @"if", @"else", @"for", @"while", @"do", @"switch",
+        @"case", @"default", @"return", @"break", @"continue",
+        @"goto"
+    ];
+    
+    for (NSString *keyword in controlFlowKeywords) {
+        if ([trimmedLine hasPrefix:keyword] || [trimmedLine containsString:[NSString stringWithFormat:@" %@", keyword]]) {
+            return NO;
+        }
+    }
+    
+    // 跳过包含 @ 或 # 的行
+    if ([trimmedLine hasPrefix:@"@"] || [trimmedLine hasPrefix:@"#"]) {
+        return NO;
+    }
+    
+    // 检查括号平衡
+    NSString *textBeforeSemicolon = [methodBody substringToIndex:position];
+    if (![self isTextBalanced:textBeforeSemicolon]) {
+        return NO;
+    }
+    
+    return YES;
+}
+
++ (NSString *)getLineContainingPosition:(NSUInteger)position inString:(NSString *)string {
+    // 找到行的开始
+    NSUInteger lineStart = position;
+    while (lineStart > 0) {
+        unichar ch = [string characterAtIndex:lineStart - 1];
+        if (ch == '\n') {
+            break;
+        }
+        lineStart--;
+    }
+    
+    // 找到行的结束
+    NSUInteger lineEnd = position;
+    while (lineEnd < string.length) {
+        unichar ch = [string characterAtIndex:lineEnd];
+        if (ch == '\n') {
+            break;
+        }
+        lineEnd++;
+    }
+    
+    if (lineStart <= lineEnd && lineEnd <= string.length) {
+        return [string substringWithRange:NSMakeRange(lineStart, lineEnd - lineStart)];
+    }
+    
+    return @"";
+}
+
++ (NSString *)getIndentAtPosition:(NSUInteger)position inMethodBody:(NSString *)methodBody {
+    NSString *line = [self getLineContainingPosition:position inString:methodBody];
+    
+    NSUInteger indentLength = 0;
+    for (NSUInteger i = 0; i < line.length; i++) {
+        unichar ch = [line characterAtIndex:i];
+        if (ch == ' ' || ch == '\t') {
+            indentLength++;
+        } else {
+            break;
+        }
+    }
+    
+    if (indentLength > 0 && indentLength <= line.length) {
+        return [line substringToIndex:indentLength];
+    }
+    
+    return @"";
+}
+
++ (BOOL)isTextBalanced:(NSString *)text {
+    // 简单的括号平衡检查
+    NSInteger parenCount = 0;
+    NSInteger bracketCount = 0;
+    NSInteger braceCount = 0;
+    
+    for (NSUInteger i = 0; i < text.length; i++) {
+        unichar ch = [text characterAtIndex:i];
+        
+        if (ch == '(') parenCount++;
+        else if (ch == ')') parenCount--;
+        else if (ch == '[') bracketCount++;
+        else if (ch == ']') bracketCount--;
+        else if (ch == '{') braceCount++;
+        else if (ch == '}') braceCount--;
+        
+        // 如果括号计数出现负数，说明不平衡
+        if (parenCount < 0 || bracketCount < 0 || braceCount < 0) {
+            return NO;
+        }
+    }
+    
+    // 最终检查所有括号是否平衡
+    return (parenCount == 0 && bracketCount == 0 && braceCount == 0);
 }
 
 + (BOOL)methodContainsSwitchStatement:(NSString *)methodContent {
@@ -924,21 +1043,9 @@ static NSArray *_propertyList = @[];
     return NO;
 }
 
-+ (NSString *)extractIndentFromLine:(NSString *)line {
-    NSUInteger indentLength = 0;
-    for (NSUInteger i = 0; i < line.length; i++) {
-        unichar ch = [line characterAtIndex:i];
-        if (ch == ' ' || ch == '\t') {
-            indentLength++;
-        } else {
-            break;
-        }
-    }
-    return [line substringToIndex:indentLength];
-}
 
 
-#pragma mark - 随机代码生成器（修复格式化崩溃问题）
+#pragma mark - 随机代码生成器（随机变量名）
 
 + (NSString *)generateRandomCodeWithIndent:(NSString *)indent {
     // 随机选择代码类型
@@ -966,36 +1073,100 @@ static NSArray *_propertyList = @[];
     }
 }
 
+#pragma mark - 随机变量名生成器
+
++ (NSString *)generateRandomVariableName {
+    NSArray *prefixes = [BFWordsRackTool propertyNames];
+    
+    NSArray *suffixes = [BFWordsRackTool propertyNames];
+    
+    NSString *prefix = prefixes[arc4random_uniform((uint32_t)prefixes.count)];
+    NSString *suffix = suffixes[arc4random_uniform((uint32_t)suffixes.count)];
+    
+    // 有时添加数字增加随机性
+    if (arc4random_uniform(3) == 0) {
+        NSUInteger randomNum = arc4random_uniform(10);
+        return [NSString stringWithFormat:@"%@%@%lu", prefix, suffix, (unsigned long)randomNum];
+    } else {
+        return [NSString stringWithFormat:@"%@%@", prefix, suffix];
+    }
+}
+
++ (NSString *)generateRandomClassName {
+    NSArray *classPrefixes = [BFWordsRackTool propertyNames];
+    
+    NSArray *classSuffixes = [BFWordsRackTool propertyNames];
+    
+    NSString *prefix = classPrefixes[arc4random_uniform((uint32_t)classPrefixes.count)];
+    NSString *suffix = classSuffixes[arc4random_uniform((uint32_t)classSuffixes.count)];
+    
+    return [NSString stringWithFormat:@"%@%@", prefix, suffix];
+}
+
+#pragma mark - 各种代码生成方法（使用随机变量名）
+
 + (NSString *)generateVariableOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    NSString *var5 = [self generateRandomVariableName];
+    NSString *var6 = [self generateRandomVariableName];
     NSArray *templates = @[
-        // 基本变量操作
-        @"CGFloat tempValue = M_PI * 2.0;\nUIView *containerView = [[UIView alloc] init];\ncontainerView.alpha = tempValue / 10.0;",
+        // 模板 1: 基础变量操作
+        [NSString stringWithFormat:@"CGFloat %@ = M_PI * 2.0;\nUIView *%@ = [[UIView alloc] init];\n%@.alpha = %@ / 10.0;",
+         var1, var2, var2, var1],
         
-        @"NSInteger iterationCount = 5;\nBOOL shouldProcess = YES;\nCGFloat scaleFactor = 1.5;\nCGRect viewFrame = CGRectMake(0, 0, 100 * scaleFactor, 50 * scaleFactor);",
+        // 模板 2: 数学计算
+        [NSString stringWithFormat:@"NSInteger %@ = 5;\nBOOL %@ = YES;\nCGFloat %@ = 1.5;\nCGRect %@ = CGRectMake(0, 0, 100 * %@, 50 * %@);",
+         var3, var4, var5, var6, var5, var5],
         
-        @"id temporaryObject = nil;\nClass targetClass = [NSString class];\nSEL actionSelector = @selector(length);\nProtocol *dataProtocol = @protocol(NSCopying);",
+        // 模板 3: 对象和协议
+        [NSString stringWithFormat:@"id %@ = nil;\nClass %@ = [NSString class];\nSEL %@ = @selector(length);\nProtocol *%@ = @protocol(NSCopying);",
+         var1, var2, var3, var4],
         
-        @"NSUInteger itemCount = 10;\nCGFloat padding = 8.0;\nCGSize elementSize = CGSizeMake(44.0, 44.0);\nCGFloat totalWidth = itemCount * (elementSize.width + padding);",
+        // 模板 4: 尺寸计算
+        [NSString stringWithFormat:@"NSUInteger %@ = 10;\nCGFloat %@ = 8.0;\nCGSize %@ = CGSizeMake(44.0, 44.0);\nCGFloat %@ = %@ * (%@.width + %@);",
+         var1, var2, var3, var4, var1, var3, var2],
         
-        @"BOOL isVertical = YES;\nBOOL hasContent = NO;\nBOOL needsLayout = YES;\nUIEdgeInsets contentInset = UIEdgeInsetsMake(10, 10, 10, 10);"
+        // 模板 5: 颜色和视图
+        [NSString stringWithFormat:@"UIColor *%@ = [UIColor colorWithRed:0.5 green:0.5 blue:0.5 alpha:1.0];\nUIView *%@ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 50)];\n%@.backgroundColor = %@;\n%@.layer.cornerRadius = 5.0;",
+         var1, var2, var2, var1, var2],
+        
+        // 模板 6: 数组和字典
+        [NSString stringWithFormat:@"NSArray *%@ = @[@1, @2, @3];\nNSDictionary *%@ = @{@\"key\": @\"value\"};\nNSMutableArray *%@ = [%@ mutableCopy];\n[%@ addObject:@4];",
+         var1, var2, var3, var1, var3],
+        
+        // 模板 7: 几何变换
+        [NSString stringWithFormat:@"CGAffineTransform %@ = CGAffineTransformIdentity;\nCGAffineTransform %@ = CGAffineTransformMakeScale(1.5, 1.5);\nCGAffineTransform %@ = CGAffineTransformRotate(%@, M_PI_4);\nCGAffineTransform %@ = CGAffineTransformConcat(%@, %@);",
+         var1, var2, var3, var2, var4, var1, var3],
+        
+        // 模板 8: 字符串操作
+        [NSString stringWithFormat:@"NSString *%@ = @\"Hello\";\nNSString *%@ = @\"World\";\nNSString *%@ = [NSString stringWithFormat:@\"%%@ %%@\", %@, %@];\nNSInteger %@ = %@.length;",
+         var1, var2, var3, var1, var2, var4, var3]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
+    
     return [self applyIndent:indent toCode:template];
 }
 
 + (NSString *)generateControlFlowWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // 条件语句
-        @"if (YES) {\n    CGFloat calculatedValue = M_E * 2.0;\n    CGRect tempRect = CGRectMake(0, 0, calculatedValue, calculatedValue);\n}",
+        [NSString stringWithFormat:@"if (YES) {\n    CGFloat %@ = M_E * 2.0;\n    CGRect %@ = CGRectMake(0, 0, %@, %@);\n}", var1, var2, var1, var1],
         
-        @"for (NSUInteger index = 0; index < 3; index++) {\n    CGFloat progress = (CGFloat)index / 3.0;\n    CGPoint position = CGPointMake(progress * 100.0, progress * 50.0);\n}",
+        [NSString stringWithFormat:@"for (NSUInteger %@ = 0; %@ < 3; %@++) {\n    CGFloat %@ = (CGFloat)%@ / 3.0;\n    CGPoint %@ = CGPointMake(%@ * 100.0, %@ * 50.0);\n}",
+         var1, var1, var1, var2, var1, var3, var2, var2],
         
-        @"NSUInteger counter = 0;\nwhile (counter < 2) {\n    CGFloat angle = (CGFloat)counter * M_PI_4;\n    CGAffineTransform rotation = CGAffineTransformMakeRotation(angle);\n    counter++;\n}",
+        [NSString stringWithFormat:@"NSUInteger %@ = 0;\nwhile (%@ < 2) {\n    CGFloat %@ = (CGFloat)%@ * M_PI_4;\n    CGAffineTransform %@ = CGAffineTransformMakeRotation(%@);\n    %@++;\n}",
+         var1, var1, var2, var1, var3, var2, var1],
         
-        @"BOOL conditionA = YES;\nBOOL conditionB = NO;\nif (conditionA && !conditionB) {\n    CGFloat blendValue = 0.7;\n    UIColor *blendedColor = [UIColor colorWithWhite:blendValue alpha:1.0];\n}",
-        
-        @"do {\n    CGAffineTransform identity = CGAffineTransformIdentity;\n    CGFloat scale = 1.2;\n    CGAffineTransform scaled = CGAffineTransformScale(identity, scale, scale);\n} while (NO);"
+        [NSString stringWithFormat:@"BOOL %@ = YES;\nBOOL %@ = NO;\nif (%@ && !%@) {\n    CGFloat %@ = 0.7;\n    UIColor *%@ = [UIColor colorWithWhite:%@ alpha:1.0];\n}",
+         var1, var2, var1, var2, var3, [self generateRandomVariableName], var3]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1003,21 +1174,23 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateDataStructuresWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // 数组操作
-        @"NSMutableArray *collection = [NSMutableArray array];\n[collection addObject:[NSValue valueWithCGRect:CGRectMake(0, 0, 50, 50)]];\n[collection addObject:[NSValue valueWithCGPoint:CGPointMake(10, 10)]];\n[collection addObject:[NSValue valueWithCGAffineTransform:CGAffineTransformIdentity]];",
+        [NSString stringWithFormat:@"NSMutableArray *%@ = [NSMutableArray array];\n[%@ addObject:[NSValue valueWithCGRect:CGRectMake(0, 0, 50, 50)]];\n[%@ addObject:[NSValue valueWithCGPoint:CGPointMake(10, 10)]];\n[%@ addObject:[NSValue valueWithCGAffineTransform:CGAffineTransformIdentity]];",
+         var1, var1, var1, var1],
         
-        // 字典操作
-        @"NSMutableDictionary *configuration = [NSMutableDictionary dictionary];\nconfiguration[@\"scale\"] = @(1.5);\nconfiguration[@\"duration\"] = @(0.3);\nconfiguration[@\"opacity\"] = @(0.8);\nCGSize configuredSize = CGSizeMake(100 * [configuration[@\"scale\"] floatValue], 100);",
+        [NSString stringWithFormat:@"NSMutableDictionary *%@ = [NSMutableDictionary dictionary];\n%@[@\"scale\"] = @(1.5);\n%@[@\"duration\"] = @(0.3);\n%@[@\"opacity\"] = @(0.8);\nCGSize %@ = CGSizeMake(100 * [%@[@\"scale\"] floatValue], 100);",
+         var1, var1, var1, var1, var2, var1],
         
-        // 集合操作
-        @"NSMutableSet *uniqueItems = [NSMutableSet set];\n[uniqueItems addObject:@(M_PI)];\n[uniqueItems addObject:@(M_E)];\n[uniqueItems addObject:@(M_LN2)];\nNSUInteger uniqueCount = uniqueItems.count;",
+        [NSString stringWithFormat:@"NSMutableSet *%@ = [NSMutableSet set];\n[%@ addObject:@(M_PI)];\n[%@ addObject:@(M_E)];\n[%@ addObject:@(M_LN2)];\nNSUInteger %@ = %@.count;",
+         var1, var1, var1, var1, var2, var1],
         
-        // 排序操作
-        @"NSArray *values = @[@(3.14), @(2.71), @(1.41), @(1.61)];\nNSArray *sortedValues = [values sortedArrayUsingComparator:^NSComparisonResult(NSNumber *a, NSNumber *b) {\n    return [a compare:b];\n}];\nCGFloat firstValue = [sortedValues.firstObject floatValue];",
-        
-        // 过滤操作
-        @"NSArray *sourceArray = @[@(10), @(20), @(30), @(40)];\nNSPredicate *filterPredicate = [NSPredicate predicateWithFormat:@\"self > 25\"];\nNSArray *filteredArray = [sourceArray filteredArrayUsingPredicate:filterPredicate];\nCGFloat filteredSum = 0;\nfor (NSNumber *number in filteredArray) {\n    filteredSum += [number floatValue];\n}"
+        [NSString stringWithFormat:@"NSArray *%@ = @[@(3.14), @(2.71), @(1.41), @(1.61)];\nNSArray *%@ = [%@ sortedArrayUsingComparator:^NSComparisonResult(NSNumber *%@, NSNumber *%@) {\n    return [%@ compare:%@];\n}];\nCGFloat %@ = [%@.firstObject floatValue];",
+         var1, var2, var1, var3, var4, var3, var4, [self generateRandomVariableName], var2]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1025,21 +1198,23 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateObjectOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // UIView 操作
-        @"UIView *contentView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];\ncontentView.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];\ncontentView.layer.cornerRadius = 8.0;\ncontentView.layer.borderWidth = 1.0;\ncontentView.layer.borderColor = [UIColor colorWithWhite:0.8 alpha:1.0].CGColor;",
+        [NSString stringWithFormat:@"UIView *%@ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];\n%@.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1.0];\n%@.layer.cornerRadius = 8.0;\n%@.layer.borderWidth = 1.0;\n%@.layer.borderColor = [UIColor colorWithWhite:0.8 alpha:1.0].CGColor;",
+         var1, var1, var1, var1, var1],
         
-        // 颜色操作
-        @"CGFloat redComponent = 0.2;\nCGFloat greenComponent = 0.4;\nCGFloat blueComponent = 0.6;\nUIColor *customColor = [UIColor colorWithRed:redComponent green:greenComponent blue:blueComponent alpha:1.0];\nCGColorRef colorRef = customColor.CGColor;",
+        [NSString stringWithFormat:@"CGFloat %@ = 0.2;\nCGFloat %@ = 0.4;\nCGFloat %@ = 0.6;\nUIColor *%@ = [UIColor colorWithRed:%@ green:%@ blue:%@ alpha:1.0];\nCGColorRef %@ = %@.CGColor;",
+         var1, var2, var3, var4, var1, var2, var3, [self generateRandomVariableName], var4],
         
-        // 变换操作
-        @"CGAffineTransform baseTransform = CGAffineTransformIdentity;\nCGAffineTransform scaledTransform = CGAffineTransformScale(baseTransform, 1.2, 0.8);\nCGAffineTransform rotatedTransform = CGAffineTransformRotate(scaledTransform, M_PI_4);\nCGAffineTransform translatedTransform = CGAffineTransformTranslate(rotatedTransform, 10, 5);",
+        [NSString stringWithFormat:@"CGAffineTransform %@ = CGAffineTransformIdentity;\nCGAffineTransform %@ = CGAffineTransformScale(%@, 1.2, 0.8);\nCGAffineTransform %@ = CGAffineTransformRotate(%@, M_PI_4);\nCGAffineTransform %@ = CGAffineTransformTranslate(%@, 10, 5);",
+         var1, var2, var1, var3, var2, var4, var3],
         
-        // 图层操作
-        @"CALayer *contentLayer = [CALayer layer];\ncontentLayer.frame = CGRectMake(0, 0, 100, 50);\ncontentLayer.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0].CGColor;\ncontentLayer.cornerRadius = 4.0;\ncontentLayer.shadowOpacity = 0.2;",
-        
-        // 动画操作
-        @"[UIView animateWithDuration:0.25 animations:^{\n    CGAffineTransform scaleTransform = CGAffineTransformMakeScale(1.1, 1.1);\n    CGAffineTransform currentTransform = scaleTransform;\n} completion:^(BOOL finished) {\n    CGAffineTransform identityTransform = CGAffineTransformIdentity;\n}];"
+        [NSString stringWithFormat:@"CALayer *%@ = [CALayer layer];\n%@.frame = CGRectMake(0, 0, 100, 50);\n%@.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0].CGColor;\n%@.cornerRadius = 4.0;\n%@.shadowOpacity = 0.2;",
+         var1, var1, var1, var1, var1]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1047,21 +1222,20 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateStringOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // 字符串构建
-        @"NSString *baseString = @\"Content\";\nNSString *suffixString = @\"Data\";\nNSString *combinedString = [baseString stringByAppendingString:suffixString];\nNSUInteger stringLength = combinedString.length;\nNSRange fullRange = NSMakeRange(0, stringLength);",
+        [NSString stringWithFormat:@"NSString *%@ = @\"Content\";\nNSString *%@ = @\"Data\";\nNSString *%@ = [%@ stringByAppendingString:%@];\nNSUInteger %@ = %@.length;\nNSRange %@ = NSMakeRange(0, %@);",
+         var1, var2, var3, var1, var2, var4, var3, [self generateRandomVariableName], var4],
         
-        // 字符串处理
-        @"NSString *sourceText = @\"SampleText\";\nNSString *uppercaseVersion = [sourceText uppercaseString];\nNSString *lowercaseVersion = [sourceText lowercaseString];\nNSString *capitalizedVersion = [sourceText capitalizedString];\nNSComparisonResult comparison = [uppercaseVersion compare:lowercaseVersion];",
+        [NSString stringWithFormat:@"NSString *%@ = @\"SampleText\";\nNSString *%@ = [%@ uppercaseString];\nNSString *%@ = [%@ lowercaseString];\nNSString *%@ = [%@ capitalizedString];\nNSComparisonResult %@ = [%@ compare:%@];",
+         var1, var2, var1, var3, var1, var4, var1, [self generateRandomVariableName], var2, var3],
         
-        // 路径操作
-        @"NSString *documentsPath = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;\nNSString *filePath = [documentsPath stringByAppendingPathComponent:@\"data.file\"];\nNSString *fileExtension = [filePath pathExtension];\nNSString *fileName = [filePath lastPathComponent];\nNSString *directoryPath = [filePath stringByDeletingLastPathComponent];",
-        
-        // 格式化字符串
-        @"CGFloat widthValue = 120.5;\nCGFloat heightValue = 80.25;\nNSString *sizeDescription = [NSString stringWithFormat:@\"%.1fx%.1f\", widthValue, heightValue];\nCGSize describedSize = CGSizeMake(widthValue, heightValue);",
-        
-        // 字符串分析
-        @"NSString *testString = @\"ABCDEFG\";\nNSRange searchRange = NSMakeRange(0, testString.length);\nNSRange foundRange = [testString rangeOfString:@\"CDE\" options:0 range:searchRange];\nBOOL containsSubstring = foundRange.location != NSNotFound;\nNSString *substring = containsSubstring ? [testString substringWithRange:foundRange] : @\"\";"
+        [NSString stringWithFormat:@"NSString *%@ = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;\nNSString *%@ = [%@ stringByAppendingPathComponent:@\"data.file\"];\nNSString *%@ = [%@ pathExtension];\nNSString *%@ = [%@ lastPathComponent];\nNSString *%@ = [%@ stringByDeletingLastPathComponent];",
+         var1, var2, var1, var3, var2, var4, var2, [self generateRandomVariableName], var2]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1069,21 +1243,20 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateMathematicalOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // 几何计算
-        @"CGRect containerRect = CGRectMake(0, 0, 200, 100);\nCGRect innerRect = CGRectInset(containerRect, 10, 5);\nCGRect offsetRect = CGRectOffset(innerRect, 5, 2);\nCGRect unionRect = CGRectUnion(containerRect, offsetRect);\nCGRect intersectionRect = CGRectIntersection(containerRect, offsetRect);",
+        [NSString stringWithFormat:@"CGRect %@ = CGRectMake(0, 0, 200, 100);\nCGRect %@ = CGRectInset(%@, 10, 5);\nCGRect %@ = CGRectOffset(%@, 5, 2);\nCGRect %@ = CGRectUnion(%@, %@);\nCGRect %@ = CGRectIntersection(%@, %@);",
+         var1, var2, var1, var3, var2, var4, var1, var3, [self generateRandomVariableName], var1, var3],
         
-        // 数学计算
-        @"CGFloat baseValue = M_PI;\nCGFloat squaredValue = baseValue * baseValue;\nCGFloat squareRoot = sqrt(squaredValue);\nCGFloat cosineValue = cos(baseValue);\nCGFloat sineValue = sin(baseValue);\nCGFloat tangentValue = tan(baseValue);",
+        [NSString stringWithFormat:@"CGFloat %@ = M_PI;\nCGFloat %@ = %@ * %@;\nCGFloat %@ = sqrt(%@);\nCGFloat %@ = cos(%@);\nCGFloat %@ = sin(%@);\nCGFloat %@ = tan(%@);",
+         var1, var2, var1, var1, var3, var2, var4, var1, [self generateRandomVariableName], var1, [self generateRandomVariableName], var1],
         
-        // 点线计算
-        @"CGPoint startPoint = CGPointMake(0, 0);\nCGPoint endPoint = CGPointMake(100, 50);\nCGFloat distance = hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y);\nCGPoint midPoint = CGPointMake((startPoint.x + endPoint.x) / 2, (startPoint.y + endPoint.y) / 2);\nCGVector directionVector = CGVectorMake(endPoint.x - startPoint.x, endPoint.y - startPoint.y);",
-        
-        // 矩阵计算
-        @"CGFloat matrix[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};\nCGAffineTransform transformMatrix = CGAffineTransformMake(matrix[0], matrix[1], matrix[3], matrix[4], matrix[6], matrix[7]);\nBOOL isIdentity = CGAffineTransformIsIdentity(transformMatrix);\nCGAffineTransform invertedMatrix = CGAffineTransformInvert(transformMatrix);",
-        
-        // 数值处理
-        @"CGFloat values[5] = {1.5, 2.3, 3.7, 4.1, 5.9};\nCGFloat sum = 0;\nCGFloat average = 0;\nfor (NSUInteger i = 0; i < 5; i++) {\n    sum += values[i];\n}\naverage = sum / 5;\nCGFloat normalizedValues[5];\nfor (NSUInteger i = 0; i < 5; i++) {\n    normalizedValues[i] = values[i] / sum;\n}"
+        [NSString stringWithFormat:@"CGPoint %@ = CGPointMake(0, 0);\nCGPoint %@ = CGPointMake(100, 50);\nCGFloat %@ = hypot(%@.x - %@.x, %@.y - %@.y);\nCGPoint %@ = CGPointMake((%@.x + %@.x) / 2, (%@.y + %@.y) / 2);\nCGVector %@ = CGVectorMake(%@.x - %@.x, %@.y - %@.y);",
+         var1, var2, var3, var2, var1, var2, var1, var4, var1, var2, var1, var2, [self generateRandomVariableName], var2, var1, var2, var1]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1091,21 +1264,23 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateAsyncOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // GCD 操作
-        @"dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{\n    CGRect tempRect = CGRectMake(0, 0, 100, 50);\n    CGAffineTransform tempTransform = CGAffineTransformIdentity;\n    dispatch_async(dispatch_get_main_queue(), ^{\n        CGRect updatedRect = tempRect;\n        CGAffineTransform updatedTransform = tempTransform;\n    });\n});",
+        [NSString stringWithFormat:@"dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{\n    CGRect %@ = CGRectMake(0, 0, 100, 50);\n    CGAffineTransform %@ = CGAffineTransformIdentity;\n    dispatch_async(dispatch_get_main_queue(), ^{\n        CGRect %@ = %@;\n        CGAffineTransform %@ = %@;\n    });\n});",
+         var1, var2, var3, var1, var4, var2],
         
-        // 延迟执行
-        @"dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{\n    CGPoint targetPoint = CGPointMake(50, 25);\n    CGSize targetSize = CGSizeMake(100, 50);\n    CGRect targetRect = CGRectMake(targetPoint.x, targetPoint.y, targetSize.width, targetSize.height);\n});",
+        [NSString stringWithFormat:@"dispatch_group_t %@ = dispatch_group_create();\ndispatch_group_enter(%@);\nCGFloat %@ = M_PI;\ndispatch_group_leave(%@);\ndispatch_group_notify(%@, dispatch_get_main_queue(), ^{\n    CGFloat %@ = %@;\n});",
+         var1, var1, var2, var1, var1, var3, var2],
         
-        // 组操作
-        @"dispatch_group_t processGroup = dispatch_group_create();\ndispatch_group_enter(processGroup);\nCGFloat processedValue = M_PI;\ndispatch_group_leave(processGroup);\ndispatch_group_notify(processGroup, dispatch_get_main_queue(), ^{\n    CGFloat finalValue = processedValue;\n});",
+        [NSString stringWithFormat:@"static dispatch_once_t %@;\ndispatch_once(&%@, ^{\n    CGFloat %@ = M_E;\n    CGRect %@ = CGRectMake(0, 0, %@ * 50, %@ * 25);\n});",
+         var1, var1, var2, var3, var2, var2],
         
-        // 一次性操作
-        @"static dispatch_once_t onceToken;\ndispatch_once(&onceToken, ^{\n    CGFloat initializedValue = M_E;\n    CGRect initializedRect = CGRectMake(0, 0, initializedValue * 50, initializedValue * 25);\n});",
-        
-        // 屏障操作
-        @"dispatch_queue_t customQueue = dispatch_queue_create(\"custom.queue\", DISPATCH_QUEUE_CONCURRENT);\ndispatch_async(customQueue, ^{\n    CGFloat readValue = 3.14;\n});\ndispatch_barrier_async(customQueue, ^{\n    CGFloat writeValue = 2.71;\n});"
+        [NSString stringWithFormat:@"dispatch_queue_t %@ = dispatch_queue_create(\"custom.queue\", DISPATCH_QUEUE_CONCURRENT);\ndispatch_async(%@, ^{\n    CGFloat %@ = 3.14;\n});\ndispatch_barrier_async(%@, ^{\n    CGFloat %@ = 2.71;\n});",
+         var1, var1, var2, var1, var3]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1113,21 +1288,23 @@ static NSArray *_propertyList = @[];
 }
 
 + (NSString *)generateUtilityOperationsWithIndent:(NSString *)indent {
+    NSString *var1 = [self generateRandomVariableName];
+    NSString *var2 = [self generateRandomVariableName];
+    NSString *var3 = [self generateRandomVariableName];
+    NSString *var4 = [self generateRandomVariableName];
+    
     NSArray *templates = @[
-        // 文件操作
-        @"NSFileManager *fileManager = [NSFileManager defaultManager];\nNSString *tempDirectory = NSTemporaryDirectory();\nNSString *tempFilePath = [tempDirectory stringByAppendingPathComponent:@\"temp.data\"];\nBOOL fileExists = [fileManager fileExistsAtPath:tempFilePath];\nNSDictionary *fileAttributes = fileExists ? [fileManager attributesOfItemAtPath:tempFilePath error:NULL] : @{};",
+        [NSString stringWithFormat:@"NSFileManager *%@ = [NSFileManager defaultManager];\nNSString *%@ = NSTemporaryDirectory();\nNSString *%@ = [%@ stringByAppendingPathComponent:@\"temp.data\"];\nBOOL %@ = [%@ fileExistsAtPath:%@];\nNSDictionary *%@ = %@ ? [%@ attributesOfItemAtPath:%@ error:NULL] : @{};",
+         var1, var2, var3, var2, var4, var1, var3, [self generateRandomVariableName], var4, var1, var3],
         
-        // 用户默认值
-        @"NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];\n[userDefaults setFloat:M_PI forKey:@\"saved_constant\"];\n[userDefaults setBool:YES forKey:@\"configuration_flag\"];\nCGFloat retrievedValue = [userDefaults floatForKey:@\"saved_constant\"];\nBOOL retrievedFlag = [userDefaults boolForKey:@\"configuration_flag\"];",
+        [NSString stringWithFormat:@"NSUserDefaults *%@ = [NSUserDefaults standardUserDefaults];\n[%@ setFloat:M_PI forKey:@\"saved_constant\"];\n[%@ setBool:YES forKey:@\"configuration_flag\"];\nCGFloat %@ = [%@ floatForKey:@\"saved_constant\"];\nBOOL %@ = [%@ boolForKey:@\"configuration_flag\"];",
+         var1, var1, var1, var2, var1, var3, var1],
         
-        // 包操作
-        @"NSBundle *mainBundle = [NSBundle mainBundle];\nNSString *bundleIdentifier = mainBundle.bundleIdentifier;\nNSDictionary *bundleInfo = mainBundle.infoDictionary;\nNSString *bundleVersion = bundleInfo[@\"CFBundleShortVersionString\"];\nNSString *bundleBuild = bundleInfo[(@\"CFBundleVersion\")];",
+        [NSString stringWithFormat:@"NSBundle *%@ = [NSBundle mainBundle];\nNSString *%@ = %@.bundleIdentifier;\nNSDictionary *%@ = %@.infoDictionary;\nNSString *%@ = %@[@\"CFBundleShortVersionString\"];\nNSString *%@ = %@[(@\"CFBundleVersion\")];",
+         var1, var2, var1, var3, var1, var4, var3, [self generateRandomVariableName], var3],
         
-        // 进程信息
-        @"NSProcessInfo *processInfo = [NSProcessInfo processInfo];\nNSUInteger processorCount = processInfo.processorCount;\nNSUInteger activeProcessorCount = processInfo.activeProcessorCount;\nNSTimeInterval systemUptime = processInfo.systemUptime;\nNSString *processName = processInfo.processName;",
-        
-        // 本地化
-        @"NSLocale *currentLocale = [NSLocale currentLocale];\nNSString *localeIdentifier = currentLocale.localeIdentifier;\nNSString *languageCode = currentLocale.languageCode;\nNSString *countryCode = currentLocale.countryCode;\nNSString *currencyCode = currentLocale.currencyCode;\nNSArray *availableLocales = [NSLocale availableLocaleIdentifiers];"
+        [NSString stringWithFormat:@"NSProcessInfo *%@ = [NSProcessInfo processInfo];\nNSUInteger %@ = %@.processorCount;\nNSUInteger %@ = %@.activeProcessorCount;\nNSTimeInterval %@ = %@.systemUptime;\nNSString *%@ = %@.processName;",
+         var1, var2, var1, var3, var1, var4, var1, [self generateRandomVariableName], var1]
     ];
     
     NSString *template = templates[arc4random_uniform((uint32_t)templates.count)];
@@ -1151,6 +1328,7 @@ static NSArray *_propertyList = @[];
     NSString *result = [indentedLines componentsJoinedByString:@"\n"];
     return [result stringByAppendingString:@"\n"];
 }
+
 
 #pragma mark - 文件处理辅助方法
 
