@@ -872,4 +872,415 @@
     }
 }
 
+
+
+
+
+
+
+/// 检测未使用的图片资源并可选删除
++ (NSArray<NSString *> *)findUnusedImagesInProject:(NSString *)projectPath
+                                       excludeDirs:(NSArray<NSString *> *)excludeDirs
+                                      shouldDelete:(BOOL)shouldDelete {
+    
+    // 1. 检测未使用的图片
+    NSArray<NSString *> *unusedImages = [self findAllUnusedImagesInProject:projectPath excludeDirs:excludeDirs];
+    
+    if (unusedImages.count == 0) {
+        NSLog(@"🎉 没有找到未使用的图片资源");
+        return @[];
+    }
+    
+    // 2. 输出检测结果
+    [self logUnusedImages:unusedImages];
+    
+    // 3. 如果要求删除，则执行删除操作
+    if (shouldDelete) {
+        NSArray<NSString *> *deletedImages = [self deleteImages:unusedImages];
+        return deletedImages;
+    }
+    
+    return unusedImages;
+}
+
+#pragma mark - 私有核心方法
+
+/// 查找所有未使用的图片
++ (NSArray<NSString *> *)findAllUnusedImagesInProject:(NSString *)projectPath
+                                          excludeDirs:(NSArray<NSString *> *)excludeDirs {
+    
+    // 1. 收集所有图片资源（包括 Assets.xcassets）
+    NSArray<NSString *> *allImages = [self findAllImageResourcePathsInProject:@"/Users/wangxiangwei/Desktop/yayj_副本/yayj/yuelian" excludeDirs:excludeDirs];
+    NSLog(@"找到 %lu 个图片资源", (unsigned long)allImages.count);
+    
+    if (allImages.count == 0) {
+        return @[];
+    }
+    
+    // 2. 收集所有代码文件（排除 Assets.xcassets）
+    NSArray<NSString *> *codeFiles = [self findAllCodeFilesInProject:projectPath excludeDirs:excludeDirs];
+    NSLog(@"扫描 %lu 个代码文件...", (unsigned long)codeFiles.count);
+    
+    // 3. 检测未使用的图片
+    NSMutableArray<NSString *> *unusedImages = [NSMutableArray array];
+    
+    for (NSString *imagePath in allImages) {
+        NSString *imageName = [self imageNameFromPath:imagePath];
+        
+        // 检查图片名是否在代码文件中被引用
+        if (![self isImageUsed:imageName inCodeFiles:codeFiles]) {
+            [unusedImages addObject:imagePath];
+        }
+    }
+    
+    return [unusedImages copy];
+}
+
+/// 检查图片是否在代码文件中被使用
++ (BOOL)isImageUsed:(NSString *)imageName inCodeFiles:(NSArray<NSString *> *)codeFiles {
+    if (imageName.length == 0) {
+        return NO;
+    }
+    
+    for (NSString *codeFile in codeFiles) {
+        @autoreleasepool {
+            NSError *error = nil;
+            NSString *content = [NSString stringWithContentsOfFile:codeFile encoding:NSUTF8StringEncoding error:&error];
+            
+            if (error) {
+                // 如果UTF-8失败，尝试其他编码
+                content = [NSString stringWithContentsOfFile:codeFile usedEncoding:nil error:&error];
+            }
+            
+            if (content && [self isImageName:imageName usedInContent:content]) {
+                return YES;
+            }
+        }
+    }
+    
+    NSLog(@"❌ 图片未使用: %@", imageName);
+    return NO;
+}
+
+/// 检查图片名是否在文件内容中被使用
++ (BOOL)isImageName:(NSString *)imageName usedInContent:(NSString *)content {
+    // 多种图片引用模式
+    NSArray<NSString *> *patterns = @[
+        [NSString stringWithFormat:@"@\"%@\"", imageName],
+        [NSString stringWithFormat:@"imageNamed:@\"%@\"", imageName],
+        [NSString stringWithFormat:@"UIImage imageNamed:@\"%@\"", imageName],
+        [NSString stringWithFormat:@"\\\"%@\\\"", imageName],  // 转义引号
+        [NSString stringWithFormat:@"image=\\\"%@\\\"", imageName],  // xib/storyboard
+        [NSString stringWithFormat:@"value=\\\"%@\\\"", imageName]   // plist
+    ];
+    
+    for (NSString *pattern in patterns) {
+        NSRange range = [content rangeOfString:pattern];
+        if (range.location != NSNotFound) {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
+/// 删除图片数组
++ (NSArray<NSString *> *)deleteImages:(NSArray<NSString *> *)images {
+    NSMutableArray<NSString *> *deletedImages = [NSMutableArray array];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    NSLog(@"🗑️ 开始删除未使用的图片资源...");
+    
+    // 先收集所有需要删除的 .imageset 文件夹
+    NSMutableSet *imagesetFoldersToDelete = [NSMutableSet set];
+    
+    for (NSString *imagePath in images) {
+        @autoreleasepool {
+            // 检查文件是否存在
+            if (![fileManager fileExistsAtPath:imagePath]) {
+                NSLog(@"⚠️ 文件不存在: %@", imagePath);
+                continue;
+            }
+            
+            // 如果是 Assets.xcassets 中的图片，记录 .imageset 文件夹
+            if ([imagePath containsString:@".imageset"]) {
+                NSString *imagesetPath = [imagePath stringByDeletingLastPathComponent];
+                if ([[imagesetPath pathExtension] isEqualToString:@"imageset"]) {
+                    [imagesetFoldersToDelete addObject:imagesetPath];
+                }
+                continue; // 稍后统一删除 .imageset 文件夹
+            }
+            
+            // 删除普通图片文件
+            NSError *error = nil;
+            BOOL success = [fileManager removeItemAtPath:imagePath error:&error];
+            
+            if (success) {
+                [deletedImages addObject:imagePath];
+                NSLog(@"✅ 删除成功: %@", imagePath);
+            } else {
+                NSLog(@"❌ 删除失败: %@, 错误: %@", imagePath, error.localizedDescription);
+            }
+        }
+    }
+    
+    // 删除所有 .imageset 文件夹
+    for (NSString *imagesetPath in imagesetFoldersToDelete) {
+        [self deleteImagesetFolder:imagesetPath];
+        [deletedImages addObject:imagesetPath];
+    }
+    
+    NSLog(@"🎉 删除完成: 成功删除 %lu 个文件/文件夹", (unsigned long)deletedImages.count);
+    return [deletedImages copy];
+}
+
+/// 删除整个 .imageset 文件夹
++ (void)deleteImagesetFolder:(NSString *)imagesetPath {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    if (![fileManager fileExistsAtPath:imagesetPath]) {
+        NSLog(@"⚠️ .imageset 文件夹不存在: %@", imagesetPath);
+        return;
+    }
+    
+    NSError *error = nil;
+    BOOL success = [fileManager removeItemAtPath:imagesetPath error:&error];
+    
+    if (success) {
+        NSLog(@"✅ 删除 .imageset 文件夹成功: %@", imagesetPath);
+        
+        // 检查父目录（通常是 .xcassets 文件夹）是否为空，如果为空也删除
+        NSString *parentDir = [imagesetPath stringByDeletingLastPathComponent];
+        if ([[parentDir pathExtension] isEqualToString:@"xcassets"]) {
+            NSArray *contents = [fileManager contentsOfDirectoryAtPath:parentDir error:nil];
+            if (contents.count == 0) {
+                [fileManager removeItemAtPath:parentDir error:nil];
+                NSLog(@"✅ 删除空 .xcassets 文件夹: %@", parentDir);
+            }
+        }
+    } else {
+        NSLog(@"❌ 删除 .imageset 文件夹失败: %@, 错误: %@", imagesetPath, error.localizedDescription);
+    }
+}
+
+/// 查找所有图片资源路径（包括 Assets.xcassets）
++ (NSArray<NSString *> *)findAllImageResourcePathsInProject:(NSString *)projectPath
+                                                excludeDirs:(NSArray<NSString *> *)excludeDirs {
+    
+    NSMutableArray<NSString *> *imagePaths = [NSMutableArray array];
+    NSArray<NSString *> *imageExtensions = @[@"png", @"jpg", @"jpeg", @"gif", @"bmp", @"pdf"];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *projectURL = [NSURL fileURLWithPath:projectPath];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtURL:projectURL
+                                          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                             options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                        errorHandler:^BOOL(NSURL *url, NSError *error) {
+        return YES;
+    }];
+    
+    for (NSURL *fileURL in enumerator) {
+        NSError *error;
+        NSNumber *isDirectory;
+        if (![fileURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
+            continue;
+        }
+        
+        NSString *filePath = [fileURL path];
+        
+        // 检查是否应该排除该路径（不排除 Assets.xcassets）
+        if ([self shouldExcludePath:filePath projectPath:projectPath excludeDirs:excludeDirs]) {
+            if ([isDirectory boolValue]) {
+                [enumerator skipDescendants];
+            }
+            continue;
+        }
+        
+        // 如果是 .imageset 文件夹，跳过其子文件的遍历（我们只需要记录文件夹路径）
+        if ([isDirectory boolValue] && [[filePath pathExtension] isEqualToString:@"imageset"]) {
+            // 收集 .imageset 文件夹中的所有图片文件
+            [self addImagesFromImageset:filePath toArray:imagePaths];
+            [enumerator skipDescendants];
+            continue;
+        }
+        
+        // 如果是目录，继续遍历
+        if ([isDirectory boolValue]) {
+            continue;
+        }
+        
+        NSString *fileExtension = [[filePath pathExtension] lowercaseString];
+        
+        // 检查是否是图片文件（不包括 .imageset 中的，因为上面已经处理了）
+        if ([imageExtensions containsObject:fileExtension] && ![filePath containsString:@".imageset"]) {
+            [imagePaths addObject:filePath];
+        }
+    }
+    
+    return [imagePaths copy];
+}
+
+/// 从 .imageset 文件夹中添加所有图片文件
++ (void)addImagesFromImageset:(NSString *)imagesetPath toArray:(NSMutableArray<NSString *> *)imagePaths {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSArray<NSString *> *imageExtensions = @[@"png", @"jpg", @"jpeg", @"gif", @"bmp", @"pdf"];
+    
+    NSError *error = nil;
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:imagesetPath error:&error];
+    
+    if (error) {
+        NSLog(@"❌ 读取 .imageset 内容失败: %@", imagesetPath);
+        return;
+    }
+    
+    for (NSString *file in contents) {
+        NSString *fileExtension = [[file pathExtension] lowercaseString];
+        if ([imageExtensions containsObject:fileExtension]) {
+            NSString *imagePath = [imagesetPath stringByAppendingPathComponent:file];
+            [imagePaths addObject:imagePath];
+        }
+    }
+}
+
+/// 从图片路径中提取图片名（去除 @2x/@3x 和扩展名）
++ (NSString *)imageNameFromPath:(NSString *)imagePath {
+    NSString *fileName = [[imagePath lastPathComponent] stringByDeletingPathExtension];
+    // 去除 @2x, @3x 等后缀，只保留基础名称
+    return [self baseImageName:fileName];
+}
+
+/// 查找所有代码文件（排除 Assets.xcassets）
++ (NSArray<NSString *> *)findAllCodeFilesInProject:(NSString *)projectPath
+                                       excludeDirs:(NSArray<NSString *> *)excludeDirs {
+    
+    NSMutableArray<NSString *> *codeFiles = [NSMutableArray array];
+    NSArray<NSString *> *codeExtensions = @[@"m", @"mm", @"h", @"xib", @"storyboard", @"swift", @"plist", @"json", @"cpp", @"c"];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSURL *projectURL = [NSURL fileURLWithPath:projectPath];
+    
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtURL:projectURL
+                                          includingPropertiesForKeys:@[NSURLIsDirectoryKey]
+                                                             options:NSDirectoryEnumerationSkipsHiddenFiles
+                                                        errorHandler:^BOOL(NSURL *url, NSError *error) {
+        return YES;
+    }];
+    
+    for (NSURL *fileURL in enumerator) {
+        NSError *error;
+        NSNumber *isDirectory;
+        if (![fileURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:&error]) {
+            continue;
+        }
+        
+        NSString *filePath = [fileURL path];
+        
+        // 检查是否应该排除该路径（包括 Assets.xcassets）
+        if ([self shouldExcludePath:filePath projectPath:projectPath excludeDirs:excludeDirs] ||
+            [filePath containsString:@".xcassets"]) {
+            if ([isDirectory boolValue]) {
+                [enumerator skipDescendants];
+            }
+            continue;
+        }
+        
+        // 如果是目录，继续遍历
+        if ([isDirectory boolValue]) {
+            continue;
+        }
+        
+        NSString *fileExtension = [[filePath pathExtension] lowercaseString];
+        
+        if ([codeExtensions containsObject:fileExtension]) {
+            [codeFiles addObject:filePath];
+        }
+    }
+    
+    return [codeFiles copy];
+}
+
+#pragma mark - 工具方法
+
+/// 获取基础图片名（去除 @2x, @3x 等后缀）
++ (NSString *)baseImageName:(NSString *)imageName {
+    // 使用正则表达式去除 @2x, @3x 等后缀
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"@[0-9]+x$"
+                                                                           options:0
+                                                                             error:nil];
+    NSString *baseName = [regex stringByReplacingMatchesInString:imageName
+                                                         options:0
+                                                           range:NSMakeRange(0, imageName.length)
+                                                    withTemplate:@""];
+    
+    return baseName;
+}
+
+/// 检查是否应该排除该路径
++ (BOOL)shouldExcludePath:(NSString *)fullPath projectPath:(NSString *)projectPath excludeDirs:(NSArray<NSString *> *)excludeDirs {
+    if (!excludeDirs || excludeDirs.count == 0) {
+        excludeDirs = @[@"Pods", @"DerivedData", @".git", @"build", @"Carthage"];
+    }
+    
+    // 获取相对于项目路径的相对路径
+    NSString *relativePath = [fullPath substringFromIndex:projectPath.length];
+    if ([relativePath hasPrefix:@"/"]) {
+        relativePath = [relativePath substringFromIndex:1];
+    }
+    
+    // 检查路径的每一级目录
+    NSArray<NSString *> *pathComponents = [relativePath pathComponents];
+    
+    for (NSString *component in pathComponents) {
+        for (NSString *excludeDir in excludeDirs) {
+            if ([component isEqualToString:excludeDir]) {
+                return YES;
+            }
+        }
+    }
+    
+    return NO;
+}
+
+/// 输出未使用的图片列表
++ (void)logUnusedImages:(NSArray<NSString *> *)unusedImages {
+    NSLog(@"\n=== 检测结果 ===");
+    NSLog(@"找到 %lu 个未使用的图片资源:", (unsigned long)unusedImages.count);
+    
+    for (NSString *imagePath in unusedImages) {
+        NSString *imageName = [self imageNameFromPath:imagePath];
+        NSLog(@"📄 %@ -> 检测名称: %@", [imagePath lastPathComponent], imageName);
+    }
+    NSLog(@"==============\n");
+}
+
+/// 调试方法：检查特定图片的使用情况
++ (void)debugImageUsage:(NSString *)imageName inProject:(NSString *)projectPath excludeDirs:(NSArray<NSString *> *)excludeDirs {
+    NSArray<NSString *> *codeFiles = [self findAllCodeFilesInProject:projectPath excludeDirs:excludeDirs];
+    
+    NSLog(@"🔍 调试图片: %@", imageName);
+    
+    for (NSString *codeFile in codeFiles) {
+        @autoreleasepool {
+            NSError *error = nil;
+            NSString *content = [NSString stringWithContentsOfFile:codeFile encoding:NSUTF8StringEncoding error:&error];
+            
+            if (!error && content) {
+                NSArray<NSString *> *patterns = @[
+                    [NSString stringWithFormat:@"@\"%@\"", imageName],
+                    [NSString stringWithFormat:@"imageNamed:@\"%@\"", imageName]
+                ];
+                
+                for (NSString *pattern in patterns) {
+                    NSRange range = [content rangeOfString:pattern];
+                    if (range.location != NSNotFound) {
+                        NSLog(@"✅ 在文件 %@ 中找到匹配: %@", [codeFile lastPathComponent], pattern);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 @end

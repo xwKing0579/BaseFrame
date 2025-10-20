@@ -72,6 +72,8 @@
 //    NSLog(@"%@",imageList);
     
 //    [BFConfuseImage replaceImagesFromDirectoryA:@"/Users/wangxiangwei/Desktop/大图" toDirectoryB:directory];
+    
+//    [BFConfuseImage findUnusedImagesInProject:directory excludeDirs:@[] shouldDelete:YES];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -101,9 +103,9 @@
 //        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict103];
 //        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict103];
     //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
-    //    [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:33];
+//        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:18];
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
-    //    [BFConfuseMarker addCommentsToProjectAtPath:directory];
+//        [BFConfuseMarker addCommentsToProjectAtPath:directory];
     //    [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
     /*
      

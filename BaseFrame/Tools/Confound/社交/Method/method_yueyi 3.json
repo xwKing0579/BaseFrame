@@ -1,4 +1,5 @@
 {
+    "qmuilayer_setCornerRadius":"xy_setCornerRadius",
     "requestFinished": "xy_operationFinalized",
     "requestFailed": "xy_processTerminated",
     "HLRequestCompletionBlock": "xy_executionHandlerUnit",
@@ -961,7 +962,6 @@
     "referenceImageWidth": "xy_standardVisualSpan",
     "selectedImageCount": "xy_activeSelectionQuantity",
     "shouldPreventAppearance": "xy_visualSuppressionFlag",
-    "copyStylesToBar": "xy_styleReplicationToHeader",
     "transitionNavigationBar": "xy_animatedNavigationHeader",
     "originContainerViewBackgroundColor": "xy_sourceContainerBackdrop",
     "mutableAttributedText": "xy_modifiableStyledContent",
@@ -2227,7 +2227,6 @@
     "renShengView": "xy_veilLifePathView",
     "rootModel": "xy_crystalBaseModel",
     "setUI": "xy_phantomInterfaceConfiguration",
-    "headerView": "xy_veilHeaderCanvas",
     "currentCell": "xy_crystalActiveCell",
     "videoIndex": "xy_phantomMediaIndex",
     "statusStyle": "xy_veilStateAppearance",
