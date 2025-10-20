@@ -87,7 +87,7 @@
     //检查工具
     [self checkTool:directory];
     
-    
+    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
 //    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
     
     

@@ -33,6 +33,10 @@ NS_ASSUME_NONNULL_BEGIN
                          propertyNames:(NSArray *)propertyNames
                         excludeFolders:(NSArray *)excludeFolders;
 
+//插入随机方法
++ (void)injectRandomCodeToExistingMethodsInPath:(NSString *)path ;
+
+
 + (NSDictionary *)mapMethodDict;
 + (NSDictionary *)mapMethodDict1;
 + (NSDictionary *)mapMethodDict2;
