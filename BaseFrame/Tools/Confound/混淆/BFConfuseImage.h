@@ -30,7 +30,8 @@ NS_ASSUME_NONNULL_BEGIN
 // 替换两个目录中的同名图片
 + (void)replaceImagesFromDirectoryA:(NSString *)dirAPath toDirectoryB:(NSString *)dirBPath;
 
-
+//移除@1x
++ (void)removeAt1xSuffixFromImagesInDirectory:(NSString *)directoryPath;
 
 + (NSDictionary *)mapImageDict;
 + (NSDictionary *)mapImageDict1;

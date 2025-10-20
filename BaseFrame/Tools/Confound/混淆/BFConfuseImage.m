@@ -1283,4 +1283,79 @@
 }
 
 
+
+//移除@1x
++ (void)removeAt1xSuffixFromImagesInDirectory:(NSString *)directoryPath {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 检查目录是否存在
+    BOOL isDirectory = NO;
+    if (![fileManager fileExistsAtPath:directoryPath isDirectory:&isDirectory] || !isDirectory) {
+        NSLog(@"❌ 目录不存在或不是目录: %@", directoryPath);
+        return;
+    }
+    
+    // 获取目录下所有文件
+    NSError *error = nil;
+    NSArray *files = [fileManager contentsOfDirectoryAtPath:directoryPath error:&error];
+    
+    if (error) {
+        NSLog(@"❌ 读取目录失败: %@", error);
+        return;
+    }
+    
+    // 图片文件扩展名
+    NSArray *imageExtensions = @[@"png", @"jpg", @"jpeg", @"gif", @"bmp", @"tiff", @"tif", @"webp"];
+    
+    NSUInteger renameCount = 0;
+    
+    for (NSString *fileName in files) {
+        // 检查文件扩展名
+        NSString *fileExtension = [fileName pathExtension].lowercaseString;
+        if (![imageExtensions containsObject:fileExtension]) {
+            continue;
+        }
+        
+        // 获取文件名（不包含扩展名）
+        NSString *fileNameWithoutExtension = [fileName stringByDeletingPathExtension];
+        
+        // 检查文件名中 @ 符号的数量
+        NSArray *components = [fileNameWithoutExtension componentsSeparatedByString:@"@"];
+        NSUInteger atCount = components.count - 1; // 分隔后的数组元素数减1就是@的数量
+        
+        // 检查是否以 @1x 结尾
+        BOOL endsWithAt1x = [fileNameWithoutExtension hasSuffix:@"@1x"];
+        
+        // 如果包含两个 @ 符号且以 @1x 结尾
+        if (atCount == 2 && endsWithAt1x) {
+            // 移除 @1x 后缀
+            NSString *newFileNameWithoutExtension = [fileNameWithoutExtension substringToIndex:fileNameWithoutExtension.length - 3]; // 移除最后3个字符 "@1x"
+            NSString *newFileName = [newFileNameWithoutExtension stringByAppendingPathExtension:fileExtension];
+            
+            // 完整的旧文件路径和新文件路径
+            NSString *oldFilePath = [directoryPath stringByAppendingPathComponent:fileName];
+            NSString *newFilePath = [directoryPath stringByAppendingPathComponent:newFileName];
+            
+            // 检查新文件名是否已存在
+            if ([fileManager fileExistsAtPath:newFilePath]) {
+                NSLog(@"⚠️ 跳过重命名，文件已存在: %@", newFileName);
+                continue;
+            }
+            
+            // 重命名文件
+            NSError *renameError = nil;
+            BOOL success = [fileManager moveItemAtPath:oldFilePath toPath:newFilePath error:&renameError];
+            
+            if (success) {
+                NSLog(@"✅ 重命名成功: %@ -> %@", fileName, newFileName);
+                renameCount++;
+            } else {
+                NSLog(@"❌ 重命名失败: %@, 错误: %@", fileName, renameError);
+            }
+        }
+    }
+    
+    NSLog(@"📊 总共重命名了 %lu 个文件", (unsigned long)renameCount);
+}
+
 @end

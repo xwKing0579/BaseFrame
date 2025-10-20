@@ -177,7 +177,8 @@
     return [self compressAndConfuseImageAtPath:imagePath intensity:intensity confusedOutputPath:confusedOutputPath];
 }
 
-// 压缩和混淆图片（统一方法）
+
+// 压缩和混淆图片（统一方法）- 修复尺寸问题
 + (BOOL)compressAndConfuseImageAtPath:(NSString *)imagePath intensity:(CGFloat)intensity confusedOutputPath:(NSString *)confusedOutputPath {
     // 读取原始图片
     UIImage *originalImage = [UIImage imageWithContentsOfFile:imagePath];
@@ -186,12 +187,16 @@
         return NO;
     }
     
+    // 获取原始图片尺寸
+    CGSize originalSize = originalImage.size;
+    NSLog(@"Original image size: %.0fx%.0f", originalSize.width, originalSize.height);
+    
     // 获取原始文件属性
     NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:imagePath error:nil];
     NSNumber *fileSize = fileAttributes[NSFileSize];
     NSLog(@"Original file size: %@ bytes", fileSize);
     
-    // 高质量压缩
+    // 高质量压缩（保持尺寸不变）
     NSData *compressedData = [self compressImage:originalImage intensity:intensity originalPath:imagePath];
     if (!compressedData || compressedData.length == 0) {
         NSLog(@"Compression failed for image: %@", imagePath);
@@ -218,6 +223,22 @@
         return NO;
     }
     
+    // 验证压缩后图片尺寸
+    UIImage *compressedImage = [UIImage imageWithContentsOfFile:imagePath];
+    if (!compressedImage) {
+        NSLog(@"Failed to load compressed image for verification: %@", imagePath);
+        [self restoreImageFromBackup:backupPath toPath:imagePath];
+        return NO;
+    }
+    
+    if (!CGSizeEqualToSize(originalSize, compressedImage.size)) {
+        NSLog(@"❌ 压缩后图片尺寸改变: 原始 %.0fx%.0f -> 压缩后 %.0fx%.0f",
+              originalSize.width, originalSize.height,
+              compressedImage.size.width, compressedImage.size.height);
+        [self restoreImageFromBackup:backupPath toPath:imagePath];
+        return NO;
+    }
+    
     // 在指定目录中创建混淆图片
     BOOL confuseSuccess = [self createConfusedImageFromBackup:backupPath originalPath:imagePath intensity:intensity confusedOutputPath:confusedOutputPath];
     
@@ -227,7 +248,61 @@
     return confuseSuccess;
 }
 
-// 创建混淆图片（核心方法）
+// 智能PNG压缩 - 修复尺寸问题
++ (NSData *)smartPNGCompression:(UIImage *)image intensity:(CGFloat)intensity originalPath:(NSString *)originalPath {
+    // 读取原始文件大小
+    NSData *originalData = [NSData dataWithContentsOfFile:originalPath];
+    NSUInteger originalSize = originalData.length;
+    
+    // 策略1：如果强度高，尽量保持原质量
+    if (intensity > 0.8) {
+        // 只进行轻微优化，不改变尺寸
+        NSData *optimized = [self optimizePNGWithMinimalChanges:image];
+        if (optimized.length < originalSize * 1.1) { // 增加不超过10%
+            return optimized;
+        }
+        return originalData; // 如果优化后更大，返回原数据
+    }
+    
+    // 策略2：中等强度，使用质量压缩但不改变尺寸
+    if (intensity > 0.5) {
+        return [self compressPNGByQuality:image intensity:intensity];
+    }
+    
+    // 策略3：低强度，轻微质量压缩
+    return [self compressPNGByQuality:image intensity:intensity];
+}
+
+// PNG质量压缩（不改变尺寸）
++ (NSData *)compressPNGByQuality:(UIImage *)image intensity:(CGFloat)intensity {
+    @autoreleasepool {
+        // 使用ImageIO进行可控的PNG压缩
+        NSMutableData *data = [NSMutableData data];
+        CGImageDestinationRef destination = CGImageDestinationCreateWithData((__bridge CFMutableDataRef)data, kUTTypePNG, 1, NULL);
+        
+        if (destination) {
+            // 根据强度设置压缩参数
+            CGFloat compressionLevel = 1.0 - (intensity * 0.3); // 0.7-1.0
+            compressionLevel = MAX(0.1, MIN(1.0, compressionLevel));
+            
+            NSDictionary *options = @{
+                (__bridge NSString *)kCGImageDestinationLossyCompressionQuality: @(compressionLevel),
+                (__bridge NSString *)kCGImagePropertyPNGCompressionFilter: @(6) // 自适应压缩
+            };
+            
+            CGImageDestinationAddImage(destination, image.CGImage, (__bridge CFDictionaryRef)options);
+            CGImageDestinationFinalize(destination);
+            CFRelease(destination);
+            
+            return [data copy];
+        }
+    }
+    
+    // 降级方案：使用UIImagePNGRepresentation
+    return UIImagePNGRepresentation(image);
+}
+
+// 创建混淆图片（核心方法）- 修复尺寸问题
 + (BOOL)createConfusedImage:(UIImage *)originalImage atPath:(NSString *)originalPath intensity:(CGFloat)intensity confusedOutputPath:(NSString *)confusedOutputPath {
     // 生成混淆图片路径（在指定输出目录中）
     NSString *confusedPath = [self confusedImagePathForPath:originalPath confusedOutputPath:confusedOutputPath];
@@ -235,21 +310,23 @@
         return NO;
     }
     
-    // 添加调试日志确认路径
-    NSLog(@"原图片路径: %@", originalPath);
-    NSLog(@"混淆输出目录: %@", confusedOutputPath);
-    NSLog(@"生成的混淆图片路径: %@", confusedPath);
+    // 记录原始尺寸
+    CGSize originalSize = originalImage.size;
+    NSLog(@"创建混淆图片 - 原始尺寸: %.0fx%.0f, 路径: %@", originalSize.width, originalSize.height, confusedPath);
     
-    // 确认路径是否在指定输出目录
-    if (![confusedPath hasPrefix:confusedOutputPath]) {
-        NSLog(@"⚠️ 警告：混淆图片路径不在指定输出目录！");
-        return NO;
-    }
-    
-    // 应用多种混淆技术
+    // 应用多种混淆技术（保持尺寸）
     UIImage *confusedImage = [self applyConfusionTechniques:originalImage intensity:intensity];
     if (!confusedImage) {
         return NO;
+    }
+    
+    // 验证混淆后图片尺寸
+    if (!CGSizeEqualToSize(originalSize, confusedImage.size)) {
+        NSLog(@"❌ 混淆后图片尺寸改变: 原始 %.0fx%.0f -> 混淆后 %.0fx%.0f",
+              originalSize.width, originalSize.height,
+              confusedImage.size.width, confusedImage.size.height);
+        // 调整尺寸回原始尺寸
+        confusedImage = [self resizeImage:confusedImage toSize:originalSize];
     }
     
     // 保存混淆图片
@@ -268,7 +345,12 @@
     BOOL success = [outputData writeToFile:confusedPath atomically:YES];
     
     if (success) {
-        NSLog(@"✅ 成功创建混淆图片: %@", confusedPath);
+        // 验证保存的图片尺寸
+        UIImage *savedImage = [UIImage imageWithContentsOfFile:confusedPath];
+        if (savedImage && !CGSizeEqualToSize(originalSize, savedImage.size)) {
+            NSLog(@"⚠️ 保存的混淆图片尺寸不一致: %.0fx%.0f", savedImage.size.width, savedImage.size.height);
+        }
+        NSLog(@"✅ 成功创建混淆图片: %@ (尺寸: %.0fx%.0f)", confusedPath, originalSize.width, originalSize.height);
     } else {
         NSLog(@"❌ 创建混淆图片失败: %@", confusedPath);
     }
@@ -276,7 +358,122 @@
     return success;
 }
 
-// 生成在指定目录中的混淆图片路径（唯一的方法）
+// 调整图片尺寸到指定大小
++ (UIImage *)resizeImage:(UIImage *)image toSize:(CGSize)targetSize {
+    UIGraphicsBeginImageContextWithOptions(targetSize, NO, image.scale);
+    [image drawInRect:CGRectMake(0, 0, targetSize.width, targetSize.height)];
+    UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return resizedImage;
+}
+
+// 高质量颜色调整 - 修复尺寸问题
++ (UIImage *)applyHighQualityColorAdjustment:(UIImage *)image intensity:(CGFloat)intensity {
+    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
+    
+    CIFilter *colorControls = [CIFilter filterWithName:@"CIColorControls"];
+    [colorControls setValue:ciImage forKey:kCIInputImageKey];
+    [colorControls setValue:@(1.0 + intensity * 0.3) forKey:kCIInputContrastKey];
+    [colorControls setValue:@(intensity * 0.1) forKey:kCIInputBrightnessKey];
+    [colorControls setValue:@(1.0 + intensity * 0.4) forKey:kCIInputSaturationKey];
+    
+    CIFilter *vibrance = [CIFilter filterWithName:@"CIVibrance"];
+    [vibrance setValue:[colorControls valueForKey:kCIOutputImageKey] forKey:kCIInputImageKey];
+    [vibrance setValue:@(intensity * 0.8) forKey:@"inputAmount"];
+    
+    CIImage *outputImage = [vibrance valueForKey:kCIOutputImageKey];
+    
+    CIContext *context = [CIContext contextWithOptions:@{
+        kCIContextUseSoftwareRenderer: @NO,
+        kCIContextHighQualityDownsample: @YES,
+    }];
+    
+    // 使用原始图片的尺寸和scale
+    CGRect outputRect = CGRectMake(0, 0, image.size.width * image.scale, image.size.height * image.scale);
+    CGImageRef cgImage = [context createCGImage:outputImage fromRect:outputRect];
+    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
+    CGImageRelease(cgImage);
+    
+    return resultImage;
+}
+
+// 纹理合成增强 - 修复尺寸问题
++ (UIImage *)applyTextureEnhancement:(UIImage *)image intensity:(CGFloat)intensity {
+    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
+    
+    CIFilter *noiseFilter = [CIFilter filterWithName:@"CIRandomGenerator"];
+    CIImage *noiseImage = [noiseFilter valueForKey:kCIOutputImageKey];
+    
+    // 裁剪噪声图像到原始图片尺寸
+    CGRect imageRect = CGRectMake(0, 0, image.size.width * image.scale, image.size.height * image.scale);
+    noiseImage = [noiseImage imageByCroppingToRect:imageRect];
+    
+    CIFilter *blendFilter = [CIFilter filterWithName:@"CISoftLightBlendMode"];
+    [blendFilter setValue:ciImage forKey:kCIInputImageKey];
+    [blendFilter setValue:noiseImage forKey:kCIInputBackgroundImageKey];
+    
+    CIImage *outputImage = [blendFilter valueForKey:kCIOutputImageKey];
+    
+    CIContext *context = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer: @NO}];
+    
+    // 使用原始图片的尺寸
+    CGImageRef cgImage = [context createCGImage:outputImage fromRect:imageRect];
+    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
+    CGImageRelease(cgImage);
+    
+    return resultImage;
+}
+
+// 光学效果处理 - 修复尺寸问题
++ (UIImage *)applyOpticalEffects:(UIImage *)image intensity:(CGFloat)intensity {
+    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
+    
+    if (intensity > 0.3) {
+        CIFilter *bloomFilter = [CIFilter filterWithName:@"CIBloom"];
+        [bloomFilter setValue:ciImage forKey:kCIInputImageKey];
+        [bloomFilter setValue:@(intensity * 0.8) forKey:kCIInputRadiusKey];
+        [bloomFilter setValue:@(intensity * 0.4) forKey:kCIInputIntensityKey];
+        ciImage = [bloomFilter valueForKey:kCIOutputImageKey];
+    }
+    
+    CIContext *context = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer: @NO}];
+    
+    // 使用原始图片的尺寸
+    CGRect imageRect = CGRectMake(0, 0, image.size.width * image.scale, image.size.height * image.scale);
+    CGImageRef cgImage = [context createCGImage:ciImage fromRect:imageRect];
+    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
+    CGImageRelease(cgImage);
+    
+    return resultImage;
+}
+
+// 检查是否是 .imageset 目录
++ (BOOL)isImagesetDirectory:(NSString *)path {
+    NSString *currentPath = path;
+    while (![currentPath isEqualToString:[currentPath stringByDeletingLastPathComponent]]) {
+        if ([[currentPath pathExtension] isEqualToString:@"imageset"]) {
+            return YES;
+        }
+        currentPath = [currentPath stringByDeletingLastPathComponent];
+        if ([currentPath isEqualToString:@"/"]) break;
+    }
+    return NO;
+}
+
+// 检查文件是否在 .imageset 目录中
++ (BOOL)isInImagesetDirectory:(NSString *)filePath {
+    return [self isImagesetDirectory:[filePath stringByDeletingLastPathComponent]];
+}
+
++ (BOOL)createConfusedImageAtPath:(NSString *)imagePath intensity:(CGFloat)intensity confusedOutputPath:(NSString *)confusedOutputPath {
+    UIImage *originalImage = [UIImage imageWithContentsOfFile:imagePath];
+    if (!originalImage) {
+        return NO;
+    }
+    
+    return [self createConfusedImage:originalImage atPath:imagePath intensity:intensity confusedOutputPath:confusedOutputPath];
+}
+
 + (NSString *)confusedImagePathForPath:(NSString *)originalPath confusedOutputPath:(NSString *)confusedOutputPath {
     NSString *originalFilename = [originalPath lastPathComponent];
     NSString *extension = [originalPath pathExtension];
@@ -306,7 +503,17 @@
     return [confusedOutputPath stringByAppendingPathComponent:confusedFilename];
 }
 
-// 从备份创建混淆图片
++ (BOOL)restoreImageFromBackup:(NSString *)backupPath toPath:(NSString *)targetPath {
+    NSError *error;
+    BOOL success = [[NSFileManager defaultManager] copyItemAtPath:backupPath toPath:targetPath error:&error];
+    
+    if (!success) {
+        NSLog(@"Restore failed: %@", error);
+    }
+    
+    return success;
+}
+
 + (BOOL)createConfusedImageFromBackup:(NSString *)backupPath originalPath:(NSString *)originalPath intensity:(CGFloat)intensity confusedOutputPath:(NSString *)confusedOutputPath {
     UIImage *originalImage = [UIImage imageWithContentsOfFile:backupPath];
     if (!originalImage) {
@@ -316,17 +523,6 @@
     return [self createConfusedImage:originalImage atPath:originalPath intensity:intensity confusedOutputPath:confusedOutputPath];
 }
 
-// 直接创建混淆图片（不压缩）
-+ (BOOL)createConfusedImageAtPath:(NSString *)imagePath intensity:(CGFloat)intensity confusedOutputPath:(NSString *)confusedOutputPath {
-    UIImage *originalImage = [UIImage imageWithContentsOfFile:imagePath];
-    if (!originalImage) {
-        return NO;
-    }
-    
-    return [self createConfusedImage:originalImage atPath:imagePath intensity:intensity confusedOutputPath:confusedOutputPath];
-}
-
-// 压缩图片
 + (NSData *)compressImage:(UIImage *)image intensity:(CGFloat)intensity originalPath:(NSString *)originalPath {
     CGFloat compressionIntensity = MAX(0.1, MIN(1.0, intensity));
     NSString *fileExtension = [[originalPath pathExtension] lowercaseString];
@@ -341,47 +537,21 @@
     }
 }
 
-// 智能PNG压缩
-+ (NSData *)smartPNGCompression:(UIImage *)image intensity:(CGFloat)intensity originalPath:(NSString *)originalPath {
-    // 读取原始文件大小
-    NSData *originalData = [NSData dataWithContentsOfFile:originalPath];
-    NSUInteger originalSize = originalData.length;
++ (NSString *)backupOriginalImage:(NSString *)imagePath {
+    NSString *backupPath = [imagePath stringByAppendingString:@".backup"];
     
-    // 策略1：如果强度高，尽量保持原质量
-    if (intensity > 0.8) {
-        // 只进行轻微优化，不改变太多
-        NSData *optimized = [self optimizePNGWithMinimalChanges:image];
-        if (optimized.length < originalSize * 1.1) { // 增加不超过10%
-            return optimized;
-        }
-        return originalData; // 如果优化后更大，返回原数据
+    NSError *error;
+    BOOL success = [[NSFileManager defaultManager] copyItemAtPath:imagePath toPath:backupPath error:&error];
+    
+    if (!success) {
+        NSLog(@"Backup failed: %@", error);
+        return nil;
     }
     
-    // 策略2：中等强度，尺寸调整
-    if (intensity > 0.5) {
-        CGFloat scale = 0.7 + (intensity * 0.2); // 0.7-0.9
-        return [self compressPNGByResizing:image scale:scale];
-    }
-    
-    // 策略3：低强度，大幅压缩
-    CGFloat scale = 0.4 + (intensity * 0.3); // 0.4-0.7
-    return [self compressPNGByResizing:image scale:scale];
+    return backupPath;
 }
 
-// PNG尺寸调整压缩
-+ (NSData *)compressPNGByResizing:(UIImage *)image scale:(CGFloat)scale {
-    CGSize originalSize = image.size;
-    CGSize newSize = CGSizeMake(originalSize.width * scale, originalSize.height * scale);
-    
-    UIGraphicsBeginImageContextWithOptions(newSize, NO, 1.0);
-    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
-    UIImage *resizedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return UIImagePNGRepresentation(resizedImage);
-}
 
-// 最小化PNG改变
 + (NSData *)optimizePNGWithMinimalChanges:(UIImage *)image {
     @autoreleasepool {
         CGImageRef imageRef = image.CGImage;
@@ -405,34 +575,6 @@
     return UIImagePNGRepresentation(image);
 }
 
-// 备份原始图片
-+ (NSString *)backupOriginalImage:(NSString *)imagePath {
-    NSString *backupPath = [imagePath stringByAppendingString:@".backup"];
-    
-    NSError *error;
-    BOOL success = [[NSFileManager defaultManager] copyItemAtPath:imagePath toPath:backupPath error:&error];
-    
-    if (!success) {
-        NSLog(@"Backup failed: %@", error);
-        return nil;
-    }
-    
-    return backupPath;
-}
-
-// 恢复备份
-+ (BOOL)restoreImageFromBackup:(NSString *)backupPath toPath:(NSString *)targetPath {
-    NSError *error;
-    BOOL success = [[NSFileManager defaultManager] copyItemAtPath:backupPath toPath:targetPath error:&error];
-    
-    if (!success) {
-        NSLog(@"Restore failed: %@", error);
-    }
-    
-    return success;
-}
-
-// 应用混淆技术
 + (UIImage *)applyConfusionTechniques:(UIImage *)image intensity:(CGFloat)intensity {
     UIImage *currentImage = image;
     
@@ -455,35 +597,6 @@
     return currentImage ?: image;
 }
 
-// 高质量颜色调整
-+ (UIImage *)applyHighQualityColorAdjustment:(UIImage *)image intensity:(CGFloat)intensity {
-    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
-    
-    CIFilter *colorControls = [CIFilter filterWithName:@"CIColorControls"];
-    [colorControls setValue:ciImage forKey:kCIInputImageKey];
-    [colorControls setValue:@(1.0 + intensity * 0.3) forKey:kCIInputContrastKey];
-    [colorControls setValue:@(intensity * 0.1) forKey:kCIInputBrightnessKey];
-    [colorControls setValue:@(1.0 + intensity * 0.4) forKey:kCIInputSaturationKey];
-    
-    CIFilter *vibrance = [CIFilter filterWithName:@"CIVibrance"];
-    [vibrance setValue:[colorControls valueForKey:kCIOutputImageKey] forKey:kCIInputImageKey];
-    [vibrance setValue:@(intensity * 0.8) forKey:@"inputAmount"];
-    
-    CIImage *outputImage = [vibrance valueForKey:kCIOutputImageKey];
-    
-    CIContext *context = [CIContext contextWithOptions:@{
-        kCIContextUseSoftwareRenderer: @NO,
-        kCIContextHighQualityDownsample: @YES,
-    }];
-    
-    CGImageRef cgImage = [context createCGImage:outputImage fromRect:outputImage.extent];
-    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
-    CGImageRelease(cgImage);
-    
-    return resultImage;
-}
-
-// 智能像素重排列
 + (UIImage *)applySmartPixelRearrangement:(UIImage *)image intensity:(CGFloat)intensity {
     CGImageRef imageRef = image.CGImage;
     size_t width = CGImageGetWidth(imageRef);
@@ -559,77 +672,6 @@
             }
         }
     }
-}
-
-// 纹理合成增强
-+ (UIImage *)applyTextureEnhancement:(UIImage *)image intensity:(CGFloat)intensity {
-    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
-    
-    CIFilter *noiseFilter = [CIFilter filterWithName:@"CIRandomGenerator"];
-    CIImage *noiseImage = [noiseFilter valueForKey:kCIOutputImageKey];
-    
-    CIFilter *transformFilter = [CIFilter filterWithName:@"CIAffineTransform"];
-    [transformFilter setValue:noiseImage forKey:kCIInputImageKey];
-    CGAffineTransform transform = CGAffineTransformMakeScale(2.0, 2.0);
-    [transformFilter setValue:[NSValue valueWithCGAffineTransform:transform] forKey:kCIInputTransformKey];
-    noiseImage = [transformFilter valueForKey:kCIOutputImageKey];
-    
-    CIFilter *blendFilter = [CIFilter filterWithName:@"CISoftLightBlendMode"];
-    [blendFilter setValue:ciImage forKey:kCIInputImageKey];
-    [blendFilter setValue:noiseImage forKey:kCIInputBackgroundImageKey];
-    
-    CIImage *outputImage = [blendFilter valueForKey:kCIOutputImageKey];
-    
-    CIFilter *alphaFilter = [CIFilter filterWithName:@"CIColorMatrix"];
-    [alphaFilter setValue:outputImage forKey:kCIInputImageKey];
-    [alphaFilter setValue:[CIVector vectorWithX:1 Y:1 Z:1 W:intensity * 0.3] forKey:@"inputAVector"];
-    
-    outputImage = [alphaFilter valueForKey:kCIOutputImageKey];
-    
-    CIContext *context = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer: @NO}];
-    CGImageRef cgImage = [context createCGImage:outputImage fromRect:outputImage.extent];
-    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
-    CGImageRelease(cgImage);
-    
-    return resultImage;
-}
-
-// 光学效果处理
-+ (UIImage *)applyOpticalEffects:(UIImage *)image intensity:(CGFloat)intensity {
-    CIImage *ciImage = [[CIImage alloc] initWithImage:image];
-    
-    if (intensity > 0.3) {
-        CIFilter *bloomFilter = [CIFilter filterWithName:@"CIBloom"];
-        [bloomFilter setValue:ciImage forKey:kCIInputImageKey];
-        [bloomFilter setValue:@(intensity * 0.8) forKey:kCIInputRadiusKey];
-        [bloomFilter setValue:@(intensity * 0.4) forKey:kCIInputIntensityKey];
-        ciImage = [bloomFilter valueForKey:kCIOutputImageKey];
-    }
-    
-    CIContext *context = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer: @NO}];
-    CGImageRef cgImage = [context createCGImage:ciImage fromRect:ciImage.extent];
-    UIImage *resultImage = [UIImage imageWithCGImage:cgImage scale:image.scale orientation:image.imageOrientation];
-    CGImageRelease(cgImage);
-    
-    return resultImage;
-}
-
-// 检查是否是 .imageset 目录
-+ (BOOL)isImagesetDirectory:(NSString *)path {
-    NSString *currentPath = path;
-    while (![currentPath isEqualToString:[currentPath stringByDeletingLastPathComponent]]) {
-        if ([[currentPath pathExtension] isEqualToString:@"imageset"]) {
-            return YES;
-        }
-        currentPath = [currentPath stringByDeletingLastPathComponent];
-        if ([currentPath isEqualToString:@"/"]) break;
-    }
-    return NO;
-}
-
-// 检查文件是否在 .imageset 目录中
-+ (BOOL)isInImagesetDirectory:(NSString *)filePath {
-    return [self isImagesetDirectory:[filePath stringByDeletingLastPathComponent]];
 }
 
 @end

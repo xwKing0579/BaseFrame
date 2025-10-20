@@ -74,6 +74,8 @@
 //    [BFConfuseImage replaceImagesFromDirectoryA:@"/Users/wangxiangwei/Desktop/icon调整" toDirectoryB:directory];
     
 //    [BFConfuseImage findUnusedImagesInProject:directory excludeDirs:@[] shouldDelete:YES];
+    
+//    [BFConfuseImage removeAt1xSuffixFromImagesInDirectory:@"/Users/wangxiangwei/Desktop/icon调整"];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -83,7 +85,7 @@
     
     NSString *directory = @"/Users/wangxiangwei/Desktop/yayj_副本";
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
-    //    [UIImage processProjectImagesAtPath:directory intensity:0.1];
+//        [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具
     [self checkTool:directory];
     
@@ -117,13 +119,13 @@
 //        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:18];
     
       //插入随机方法
-    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
+//    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
     
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
     
-    //    [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
+        [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
     
     /*
      
