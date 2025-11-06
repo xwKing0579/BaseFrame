@@ -13,7 +13,6 @@
 #import "BFGrabWordsTool.h"
 #import "BFFileContentTool.h"
 #import "UIImage+Confusion.h"
-#import "UIImage+Compare.h"
 
 #import "BFConfuseManager.h"
 #import "BFConfuseProject.h"
@@ -29,6 +28,8 @@
 #import "BFConstantString.h"
 #import "BFConfuseModel.h"
 #import "BFConfusePBXUUID.h"
+#import "BFCodeFormatter.h"
+#import "BFUnusedFileFinder.h"
 @interface AppDelegate ()
 
 @end
@@ -75,7 +76,13 @@
     
 //    [BFConfuseImage findUnusedImagesInProject:directory excludeDirs:@[] shouldDelete:YES];
     
-//    [BFConfuseImage removeAt1xSuffixFromImagesInDirectory:@"/Users/wangxiangwei/Desktop/icon调整"];
+//    [BFConfuseImage removeAt1xSuffixFromImagesInDirectory:@"/Users/wangxiangwei/Desktop/社交/yayj_副本/yayj/XYAssetCollection/Assets.xcassets"];
+    
+    //代码对齐
+//    [BFCodeFormatter formatProjectAtPath:directory];
+    
+
+//    NSLog(@"%@",[BFUnusedFileFinder findUnusedFilesInProject:directory]);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -83,7 +90,7 @@
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
     
     
-    NSString *directory = @"/Users/wangxiangwei/Desktop/yayj_副本";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/社交/yayj_副本";
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具
@@ -116,7 +123,7 @@
     
     //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
     
-//        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:18];
+//        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:9];
     
       //插入随机方法
 //    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
@@ -125,7 +132,7 @@
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
     
-        [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
+//        [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
     
     /*
      

@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSDictionary *)mapImageDict1;
 + (NSDictionary *)mapImageDict4;
 + (NSDictionary *)mapImageDict103;
-
++ (NSDictionary *)mapImageDict200;
 @end
 
 NS_ASSUME_NONNULL_END

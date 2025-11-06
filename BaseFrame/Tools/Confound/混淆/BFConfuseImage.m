@@ -11,7 +11,7 @@
 #import <CommonCrypto/CommonCrypto.h>
 #import <Accelerate/Accelerate.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-#import "UIImage+Compare.h"
+
 @implementation BFConfuseImage
 
 
@@ -29,6 +29,10 @@
 
 + (NSDictionary *)mapImageDict103{
     return [self parseModuleMappingJSON:@"imageName_yueyi 3"];
+}
+
++ (NSDictionary *)mapImageDict200{
+    return [self parseModuleMappingJSON:@"imageName_load2"];
 }
 
 + (void)renameAssetsInDirectory:(NSString *)directory{
@@ -910,7 +914,7 @@
                                           excludeDirs:(NSArray<NSString *> *)excludeDirs {
     
     // 1. 收集所有图片资源（包括 Assets.xcassets）
-    NSArray<NSString *> *allImages = [self findAllImageResourcePathsInProject:@"/Users/wangxiangwei/Desktop/yayj_副本/yayj/yuelian" excludeDirs:excludeDirs];
+    NSArray<NSString *> *allImages = [self findAllImageResourcePathsInProject:projectPath excludeDirs:excludeDirs];
     NSLog(@"找到 %lu 个图片资源", (unsigned long)allImages.count);
     
     if (allImages.count == 0) {

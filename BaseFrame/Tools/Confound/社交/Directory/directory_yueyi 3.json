@@ -6,7 +6,7 @@
     "XXManager": "XYCoordinatorHandler",
     "XXModule": "XYComponentPackage",
     "XXResource": "XYAssetCollection",
-    "XXLibrary": "XYToolkitRepository",
+    "XXZero": "XYToolkitRepository",
     "XXFrame": "XYArchitectureCore",
     "XXCamera": "XYCaptureInterface",
     "XXEmojiKeyboard": "XYExpressionInput",
