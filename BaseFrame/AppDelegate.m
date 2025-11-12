@@ -28,8 +28,7 @@
 #import "BFConstantString.h"
 #import "BFConfuseModel.h"
 #import "BFConfusePBXUUID.h"
-#import "BFCodeFormatter.h"
-#import "BFUnusedFileFinder.h"
+
 @interface AppDelegate ()
 
 @end
@@ -90,7 +89,7 @@
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
     
     
-    NSString *directory = @"/Users/wangxiangwei/Desktop/社交/yayj_副本";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/reader/bookios_副本";
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具
@@ -100,28 +99,28 @@
 //    NSLog(@"%@",[BFConfuseModel extractModelPropertiesFromProjectPath:directory pathWhitelist:@[] pathBlacklist:@[@"Pods"]]);
     
     
-//        [BFConfuseProject renameProjectAtPath:directory oldName:@"YueYue" newName:@"XingYue"];
+//        [BFConfuseProject renameProjectAtPath:directory oldName:@"DeepBooks" newName:@"JingYueGe"];
     
-//        [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict103];
+//        [BFConfuseDirectory processProjectAtPath:directory renameMapping:BFConfuseDirectory.dict2];
     
-//          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict103 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
+//          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict2 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
     
-//        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping103];
+//        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping3];
     
-//            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict103];
+//            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict4];
     
-    //    [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
+//        [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     
-    //    [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
+//        [BFConfuseVariable safeReplaceContentInDirectory:directory renameMapping:BFConfuseVariable.mapVariableDict4];
     
-//        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict103];
+//        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict4];
     
 //        [BFConstantString replaceStringsInProjectAtPath:directory];
-//        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict103];
+//        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict4];
     
 //        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict103];
     
-    //    [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
+//        [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
     
 //        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:9];
     

@@ -260,7 +260,7 @@
     "search_start_up1": "ygj_primarySearchStart",
     "source_url1": "ygj_primarySourceUrl",
     "no_network_type": "ygj_offlineType",
-    "ks_switch": "ygj_ksToggle",
+
     "pay_tips_count": "ygj_payHintTotal",
     "bdsn1": "ygj_primarySerial",
     "ad_polling_second": "ygj_adPollSecond",
@@ -351,12 +351,12 @@
     "ad_switch": "ygj_adToggle",
     "double_min": "ygj_doubleMin",
     "topon_global": "ygj_globalTopon",
-    "ks_read": "ygj_ksRead",
+
     "gdt_read": "ygj_gdtRead",
-    "ks_lists": "ygj_ksCollections",
+
     "csj_city": "ygj_csjZone",
     "gdt_new": "ygj_gdtNew",
-    "ks_comics_read": "ygj_ksComicRead",
+
     "csj_bottom_bg": "ygj_csjBottomBg",
     "csj_big_picture_bg": "ygj_csjBigBg",
     "csj_comics_read": "ygj_csjComicRead",
@@ -365,8 +365,7 @@
     "csj_arr": "ygj_csjArray",
     "topon": "ygj_topon",
     "google": "ygj_google",
-    "ks": "ygj_ks",
-    "ks_city": "ygj_ksZone",
+
     "bd": "ygj_bizDev",
     "csj_new": "ygj_csjNew",
     "topon_read": "ygj_toponRead",

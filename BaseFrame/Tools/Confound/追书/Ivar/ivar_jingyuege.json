@@ -85,7 +85,6 @@
     "maxHight": "maximumElevation",
     "pageVc": "folioController",
     "nextViewController": "successorController",
-    "isHidden": "visibilityState",
     "readerVc": "scrapedCarefully",
     "pageModel": "folioTemplate",
     "oldHeight": "previousHeight",

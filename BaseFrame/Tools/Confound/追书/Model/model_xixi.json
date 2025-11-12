@@ -212,7 +212,7 @@
     "search_start_up1": "primaryExplorationInitialization",
     "source_url1": "primaryProvenanceLocator",
     "no_network_type": "disconnectedStateClassification",
-    "ks_switch": "knowledgePlatformToggle",
+   
     "pay_tips_count": "monetaryGuidanceMetric",
     "bdsn1": "primaryBusinessSerialCode",
     "ad_polling_second": "commercialSamplingChronometer",
@@ -302,12 +302,12 @@
     "ad_switch": "commercialControlToggle",
     "double_min": "dualLowerThreshold",
     "topon_global": "universalTopologicalParameter",
-    "ks_read": "knowledgePlatformPerusal",
+
     "gdt_read": "generalizedDataPerusal",
-    "ks_lists": "knowledgePlatformCollections",
+  
     "csj_city": "creativeServiceDomain",
     "gdt_new": "generalizedDataNovelty",
-    "ks_comics_read": "graphicalKnowledgePerusal",
+
     "csj_bottom_bg": "creativeServiceBaseVisual",
     "csj_big_picture_bg": "creativeServiceExpandedVisual",
     "csj_comics_read": "graphicalCreativePerusal",
@@ -316,8 +316,7 @@
     "csj_arr": "creativeServiceArrayStructure",
     "topon": "topologicalFramework",
     "google": "searchPlatformReference",
-    "ks": "knowledgePlatform",
-    "ks_city": "knowledgePlatformDomain",
+
     "bd": "businessIntelligence",
     "topon_read": "topologicalPerusalProcess",
     "gdt_bottom_bg": "generalizedDataBaseVisual",

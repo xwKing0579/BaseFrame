@@ -734,7 +734,7 @@ static NSArray *_propertyList = @[];
         }
         
         // 随机决定是否在这个方法中插入代码（60%概率）
-        if (arc4random_uniform(100) < 60) {
+        if (arc4random_uniform(100) < 30) {
             if ([self injectRandomCodeInMethodRange:methodRange content:content]) {
                 injectionCount++;
             }

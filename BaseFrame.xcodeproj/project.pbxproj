@@ -20,7 +20,6 @@
 		F83740502E371D7400126BDD /* method_mapLoan.json in Resources */ = {isa = PBXBuildFile; fileRef = F837404F2E371D7400126BDD /* method_mapLoan.json */; };
 		F84A37992E98EB7400A33C5D /* constantString_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */; };
 		F84A379C2E99038C00A33C5D /* model_yueyi 3.json in Resources */ = {isa = PBXBuildFile; fileRef = F84A379B2E99038C00A33C5D /* model_yueyi 3.json */; };
-		F861885D2E85BA2F00335A20 /* UIImage+Compare.m in Sources */ = {isa = PBXBuildFile; fileRef = F861885C2E85BA2F00335A20 /* UIImage+Compare.m */; };
 		F86188602E85BA8900335A20 /* UIImage+Confusion.m in Sources */ = {isa = PBXBuildFile; fileRef = F861885F2E85BA8900335A20 /* UIImage+Confusion.m */; };
 		F8642C672E85825C00290D17 /* NSArray+Catagory.m in Sources */ = {isa = PBXBuildFile; fileRef = F8642C662E85825C00290D17 /* NSArray+Catagory.m */; };
 		F8642C6B2E8582FD00290D17 /* className_yueyi 2.json in Resources */ = {isa = PBXBuildFile; fileRef = F8642C6A2E8582FD00290D17 /* className_yueyi 2.json */; };
@@ -253,8 +252,6 @@
 		F837404F2E371D7400126BDD /* method_mapLoan.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = method_mapLoan.json; sourceTree = "<group>"; };
 		F84A37982E98EB7400A33C5D /* constantString_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "constantString_yueyi 3.json"; sourceTree = "<group>"; };
 		F84A379B2E99038C00A33C5D /* model_yueyi 3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "model_yueyi 3.json"; sourceTree = "<group>"; };
-		F861885B2E85BA2F00335A20 /* UIImage+Compare.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIImage+Compare.h"; sourceTree = "<group>"; };
-		F861885C2E85BA2F00335A20 /* UIImage+Compare.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Compare.m"; sourceTree = "<group>"; };
 		F861885E2E85BA8900335A20 /* UIImage+Confusion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIImage+Confusion.h"; sourceTree = "<group>"; };
 		F861885F2E85BA8900335A20 /* UIImage+Confusion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Confusion.m"; sourceTree = "<group>"; };
 		F8642C652E85825C00290D17 /* NSArray+Catagory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+Catagory.h"; sourceTree = "<group>"; };
@@ -887,8 +884,6 @@
 				F8792F2C2C587EEB00D26F2D /* UIFont+Category.m */,
 				F8792F272C587EEB00D26F2D /* UIImage+Category.h */,
 				F8792F342C587EEC00D26F2D /* UIImage+Category.m */,
-				F861885B2E85BA2F00335A20 /* UIImage+Compare.h */,
-				F861885C2E85BA2F00335A20 /* UIImage+Compare.m */,
 				F861885E2E85BA8900335A20 /* UIImage+Confusion.h */,
 				F861885F2E85BA8900335A20 /* UIImage+Confusion.m */,
 				F8792F3A2C587EEC00D26F2D /* UIImageView+Category.h */,
@@ -1855,7 +1850,6 @@
 				F87930F42C588A0C00D26F2D /* BFFluencyMonitor.m in Sources */,
 				F87930E02C58871500D26F2D /* BFAppInfoTableViewCell.m in Sources */,
 				F8D344EF2DC53519008BDE83 /* BFConfuseProperty.m in Sources */,
-				F861885D2E85BA2F00335A20 /* UIImage+Compare.m in Sources */,
 				F87930AE2C5885E900D26F2D /* UITouch+MemoryLeak.m in Sources */,
 				F8E571162DC3630D00A7A261 /* BFConfuseManager.m in Sources */,
 				F8792F9F2C58803D00D26F2D /* BFWebViewController.m in Sources */,
