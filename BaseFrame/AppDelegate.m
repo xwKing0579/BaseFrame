@@ -116,9 +116,9 @@
 //        [BFConfuseVariable safeReplaceContentInDirectory:directory renameSetMapping:BFConfuseVariable.mapSetVariableDict4];
     
 //        [BFConstantString replaceStringsInProjectAtPath:directory];
-//        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict4];
+        [BFConstantString safeReplaceContentInDirectory:directory renameMapping:BFConstantString.mapConstantStringDict4];
     
-//        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict103];
+//        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict4];
     
 //        [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
     
@@ -131,7 +131,7 @@
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
     
-//        [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
+        [BFConfusePBXUUID obfuscateUUIDsInProjectAtPath:directory];
     
     /*
      
