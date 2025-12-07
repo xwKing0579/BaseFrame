@@ -7,6 +7,7 @@
 
 #import "BFBaseViewController.h"
 #import "UINavigationController+FDFullscreenPopGesture.h"
+#import <AFNetworking/AFNetworking.h>
 
 @interface BFBaseViewController ()<UIGestureRecognizerDelegate>
 @property (nonatomic, strong) UIButton *backBtn;
@@ -35,7 +36,11 @@
     self.navigationController.interactivePopGestureRecognizer.delegate = self;
     self.view.backgroundColor = UIColor.cFFFFFF;
     self.edgesForExtendedLayout = UIRectEdgeNone;
+    
+    
+    
 }
+
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
