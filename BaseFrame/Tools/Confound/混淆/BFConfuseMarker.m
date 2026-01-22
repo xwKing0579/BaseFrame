@@ -8,6 +8,155 @@
 #import "BFConfuseMarker.h"
 
 @implementation BFConfuseMarker
+
++ (void)traverseDirectory:(NSString *)directoryPath {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    
+    // 获取目录下的所有内容
+    NSError *error = nil;
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:directoryPath error:&error];
+    
+    if (error) {
+        NSLog(@"❌ 读取目录失败: %@", error.localizedDescription);
+        return;
+    }
+    
+    // 处理每个项目
+    for (NSString *item in contents) {
+        NSString *fullPath = [directoryPath stringByAppendingPathComponent:item];
+        
+        // 检查是否为Pods目录，如果是则跳过
+        if ([item isEqualToString:@"Pods"] || [item isEqualToString:@"pod"]) {
+            NSLog(@"⏭️  跳过Pods目录: %@", fullPath);
+            continue;
+        }
+        
+        // 检查是否隐藏文件
+        if ([item hasPrefix:@"."]) {
+            continue;
+        }
+        
+        BOOL isDirectory = NO;
+        [fileManager fileExistsAtPath:fullPath isDirectory:&isDirectory];
+        
+        if (isDirectory) {
+            // 递归遍历子目录
+            [self traverseDirectory:fullPath];
+        } else {
+            // 处理文件
+            if ([self shouldProcessFile:fullPath]) {
+                [self processFileAtPath:fullPath];
+            }
+        }
+    }
+}
+
++ (BOOL)shouldProcessFile:(NSString *)filePath {
+    NSString *extension = [filePath pathExtension];
+    
+    // 只处理Objective-C/C/C++相关文件
+    NSArray *validExtensions = @[@"m", @"mm", @"c", @"cpp", @"h", @"hpp"];
+    return [validExtensions containsObject:[extension lowercaseString]];
+}
+
++ (void)processFileAtPath:(NSString *)filePath {
+    NSError *error = nil;
+    
+    // 读取文件内容
+    NSString *content = [NSString stringWithContentsOfFile:filePath
+                                                  encoding:NSUTF8StringEncoding
+                                                     error:&error];
+    
+    if (error) {
+        NSLog(@"❌ 读取文件失败 %@: %@", filePath, error.localizedDescription);
+        return;
+    }
+    
+    // 备份原始内容用于比较
+    NSString *originalContent = [content copy];
+    
+    // 移除NSLog语句
+    // 匹配各种格式的NSLog
+    NSRegularExpression *nsLogRegex = [NSRegularExpression
+        regularExpressionWithPattern:@"NSLog\\(@\"[^\"]*\"\\)\\s*;"
+                             options:0
+                               error:&error];
+    
+    if (!error) {
+        content = [nsLogRegex stringByReplacingMatchesInString:content
+                                                       options:0
+                                                         range:NSMakeRange(0, content.length)
+                                                  withTemplate:@""];
+    }
+    
+    // 移除带参数的NSLog
+    NSRegularExpression *nsLogWithArgsRegex = [NSRegularExpression
+        regularExpressionWithPattern:@"NSLog\\([^;]*\\)\\s*;"
+                             options:0
+                               error:&error];
+    
+    if (!error) {
+        content = [nsLogWithArgsRegex stringByReplacingMatchesInString:content
+                                                               options:0
+                                                                 range:NSMakeRange(0, content.length)
+                                                          withTemplate:@""];
+    }
+    
+    // 移除Swift的print语句（针对.mm或混合文件）
+    NSRegularExpression *printRegex = [NSRegularExpression
+        regularExpressionWithPattern:@"print\\([^;]*\\)\\s*;"
+                             options:0
+                               error:&error];
+    
+    if (!error) {
+        content = [printRegex stringByReplacingMatchesInString:content
+                                                       options:0
+                                                         range:NSMakeRange(0, content.length)
+                                                  withTemplate:@""];
+    }
+    
+    // 移除空的#pragma mark之前的空行
+    NSRegularExpression *emptyLineBeforePragmaRegex = [NSRegularExpression
+        regularExpressionWithPattern:@"\\n\\s*\\n\\s*(#pragma mark)"
+                             options:0
+                               error:&error];
+    
+    if (!error) {
+        content = [emptyLineBeforePragmaRegex stringByReplacingMatchesInString:content
+                                                                      options:0
+                                                                        range:NSMakeRange(0, content.length)
+                                                                 withTemplate:@"\n\n$1"];
+    }
+    
+    // 移除多余的空行（连续3个以上的空行替换为2个）
+    NSRegularExpression *multipleEmptyLinesRegex = [NSRegularExpression
+        regularExpressionWithPattern:@"\\n\\s*\\n\\s*\\n+"
+                             options:0
+                               error:&error];
+    
+    if (!error) {
+        content = [multipleEmptyLinesRegex stringByReplacingMatchesInString:content
+                                                                   options:0
+                                                                     range:NSMakeRange(0, content.length)
+                                                              withTemplate:@"\n\n"];
+    }
+    
+    // 检查内容是否有变化
+    if (![originalContent isEqualToString:content]) {
+        // 写回文件
+        [content writeToFile:filePath
+                  atomically:YES
+                    encoding:NSUTF8StringEncoding
+                       error:&error];
+        
+        if (error) {
+            NSLog(@"❌ 写入文件失败 %@: %@", filePath, error.localizedDescription);
+        } else {
+            NSLog(@"✅ 已处理文件: %@", filePath);
+        }
+    }
+}
+
 + (void)deleteCommentsInDirectory:(NSString *)directory ignoreDirNames:(NSArray<NSString *> *)ignoreDirNames {
     NSFileManager *fm = [NSFileManager defaultManager];
     NSError *error = nil;

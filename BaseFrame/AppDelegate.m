@@ -89,6 +89,7 @@
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
 
     NSString *directory = @"/Users/wangxiangwei/Desktop/JieRan";
+
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具

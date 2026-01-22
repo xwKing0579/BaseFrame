@@ -11,6 +11,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BFConfuseMarker : NSObject
 
+///删除NSLog和print
++ (void)traverseDirectory:(NSString *)directoryPath;
+
+
 //删除所有注释
 + (void)deleteCommentsInDirectory:(NSString *)directory ignoreDirNames:(NSArray<NSString *> *)ignoreDirNames;
 
