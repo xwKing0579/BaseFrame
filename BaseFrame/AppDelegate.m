@@ -87,14 +87,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
-    NSDictionary *atsSettings = @{
-          @"NSAllowsArbitraryLoads": @(1)
-      };
-      [[NSUserDefaults standardUserDefaults] setObject:atsSettings forKey:@"NSAppTransportSecurity"];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self testWithNativeNSURLSession];
-    });
-    NSString *directory = @"/Users/wangxiangwei/Desktop/reader/bookios_副本";
+
+    NSString *directory = @"/Users/wangxiangwei/Desktop/JieRan";
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];
     //检查工具
@@ -204,91 +198,6 @@
     
 
     return YES;
-}
-
-- (void)testWithNativeNSURLSession {
-    NSURL *url = [NSURL URLWithString:@"http://42fd10627po1.vicp.fun:14120/enterprise/helpInterface/getMessage"];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    
-    // 设置方法为POST
-    request.HTTPMethod = @"POST";
-    
-    // 完全复制WKWebView的请求头
-    [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1" forHTTPHeaderField:@"User-Agent"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:@"zh-CN,zh;q=0.9" forHTTPHeaderField:@"Accept-Language"];
-    [request setValue:@"keep-alive" forHTTPHeaderField:@"Connection"];
-    
-    // 设置参数
-    NSString *postString = @"mobilePhone=17521000579&type=10"; // 你的参数
-    request.HTTPBody = [postString dataUsingEncoding:NSUTF8StringEncoding];
-    
-    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (error) {
-            NSLog(@"❌ 原生NSURLSession失败: %@", error);
-        } else {
-            NSLog(@"✅ 原生NSURLSession成功");
-            NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            NSLog(@"响应: %@", responseString);
-        }
-    }];
-    [task resume];
-}
-- (void)testGETRequest {
-    NSDictionary *parameters = @{@"mobilePhone":@"17521000579",@"type":@"10"};
-    
-    // 构建带参数的URL
-    NSString *baseURL = @"http://42fd10627po1.vicp.fun:40739/enterprise/helpInterface/getMessage";
-    NSString *urlWithParams = [self buildURLWithBase:baseURL parameters:parameters];
-    
-    NSURL *url = [NSURL URLWithString:urlWithParams];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    request.HTTPMethod = @"GET";
-    
-    // 添加浏览器相同的Header
-    [request setValue:@"Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1" forHTTPHeaderField:@"User-Agent"];
-    [request setValue:@"keep-alive" forHTTPHeaderField:@"Connection"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
-    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (error) {
-            NSLog(@"❌ GET请求失败: %@", error);
-        } else {
-            NSLog(@"✅ GET请求成功!");
-            NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            NSLog(@"响应: %@", responseString);
-            
-            // 如果GET成功，说明服务器要求GET而不是POST
-            if (responseString) {
-               
-            }
-        }
-    }];
-    [task resume];
-}
-
-// 构建带参数的URL
-- (NSString *)buildURLWithBase:(NSString *)baseURL parameters:(NSDictionary *)parameters {
-    if (!parameters || parameters.count == 0) {
-        return baseURL;
-    }
-    
-    NSMutableArray *queryItems = [NSMutableArray array];
-    for (NSString *key in parameters.allKeys) {
-        NSString *value = [parameters[key] description];
-        NSString *encodedKey = [key stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        NSString *encodedValue = [value stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        [queryItems addObject:[NSString stringWithFormat:@"%@=%@", encodedKey, encodedValue]];
-    }
-    
-    NSString *queryString = [queryItems componentsJoinedByString:@"&"];
-    
-    // 检查原URL是否已经有参数
-    if ([baseURL containsString:@"?"]) {
-        return [NSString stringWithFormat:@"%@&%@", baseURL, queryString];
-    } else {
-        return [NSString stringWithFormat:@"%@?%@", baseURL, queryString];
-    }
 }
 
 - (void)chaChongInAllWords{
