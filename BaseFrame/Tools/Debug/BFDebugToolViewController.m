@@ -181,6 +181,7 @@ static NSString *identifier = @"BFDebugToolViewCell";
         @{@"title":@"卡顿检测",@"image":@"caton",@"url":BFString.vc_monitor},
         @{@"title":@"网络数据",@"image":@"network",@"url":BFString.vc_network_monitor},
         @{@"title":@"视图数据",@"image":@"pointView",@"url":BFString.vc_fast_point},
+        @{@"title":@"生成二维码",@"image":@"pointView",@"url":@"BFQRCodeViewController"},
     ];
     
     return [NSArray yy_modelArrayWithClass:[self class] json:data];

@@ -170,6 +170,7 @@
 		F87DD6762E756C7F001821CE /* ivar_jingyuege.json in Resources */ = {isa = PBXBuildFile; fileRef = F87DD6752E756C7F001821CE /* ivar_jingyuege.json */; };
 		F87DD6782E75BC78001821CE /* set_jingyuege.json in Resources */ = {isa = PBXBuildFile; fileRef = F87DD6772E75BC78001821CE /* set_jingyuege.json */; };
 		F87DD67C2E75C657001821CE /* constantString_jingyuege.json in Resources */ = {isa = PBXBuildFile; fileRef = F87DD67B2E75C657001821CE /* constantString_jingyuege.json */; };
+		F87F1FC62F52848E00308FB4 /* BFQRCodeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F87F1FC52F52848E00308FB4 /* BFQRCodeViewController.m */; };
 		F88C6BE82E3CD6C300AAEAEB /* constantString_xixi.json in Resources */ = {isa = PBXBuildFile; fileRef = F88C6BE72E3CD6C300AAEAEB /* constantString_xixi.json */; };
 		F88C6BEA2E3CD73200AAEAEB /* ivar_xixi.json in Resources */ = {isa = PBXBuildFile; fileRef = F88C6BE92E3CD73200AAEAEB /* ivar_xixi.json */; };
 		F88C6BEC2E3CD76100AAEAEB /* set_xixi.json in Resources */ = {isa = PBXBuildFile; fileRef = F88C6BEB2E3CD76100AAEAEB /* set_xixi.json */; };
@@ -543,6 +544,8 @@
 		F87DD6752E756C7F001821CE /* ivar_jingyuege.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ivar_jingyuege.json; sourceTree = "<group>"; };
 		F87DD6772E75BC78001821CE /* set_jingyuege.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = set_jingyuege.json; sourceTree = "<group>"; };
 		F87DD67B2E75C657001821CE /* constantString_jingyuege.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = constantString_jingyuege.json; sourceTree = "<group>"; };
+		F87F1FC42F52848E00308FB4 /* BFQRCodeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BFQRCodeViewController.h; sourceTree = "<group>"; };
+		F87F1FC52F52848E00308FB4 /* BFQRCodeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BFQRCodeViewController.m; sourceTree = "<group>"; };
 		F88C6BE72E3CD6C300AAEAEB /* constantString_xixi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = constantString_xixi.json; sourceTree = "<group>"; };
 		F88C6BE92E3CD73200AAEAEB /* ivar_xixi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ivar_xixi.json; sourceTree = "<group>"; };
 		F88C6BEB2E3CD76100AAEAEB /* set_xixi.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = set_xixi.json; sourceTree = "<group>"; };
@@ -1381,6 +1384,7 @@
 		F87930762C5885E800D26F2D /* Tools */ = {
 			isa = PBXGroup;
 			children = (
+				F87F1FC32F52846E00308FB4 /* QRCode */,
 				F87930F12C588A0C00D26F2D /* Monitor */,
 				F87930DE2C58871500D26F2D /* AppInfo */,
 				F8792FD12C5885E800D26F2D /* Confound */,
@@ -1454,6 +1458,15 @@
 				F87930F02C588A0C00D26F2D /* BFThreadTrace.m */,
 			);
 			path = Monitor;
+			sourceTree = "<group>";
+		};
+		F87F1FC32F52846E00308FB4 /* QRCode */ = {
+			isa = PBXGroup;
+			children = (
+				F87F1FC42F52848E00308FB4 /* BFQRCodeViewController.h */,
+				F87F1FC52F52848E00308FB4 /* BFQRCodeViewController.m */,
+			);
+			path = QRCode;
 			sourceTree = "<group>";
 		};
 		F88FD0232E7C6303008343AE /* Method */ = {
@@ -1777,9 +1790,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BaseFrame/Pods-BaseFrame-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BaseFrame/Pods-BaseFrame-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1913,6 +1930,7 @@
 				F87930962C5885E900D26F2D /* BFFileDataViewController.m in Sources */,
 				F87930872C5885E900D26F2D /* BFModifyProjectViewController.m in Sources */,
 				F8792F752C587F5B00D26F2D /* BFOperation.m in Sources */,
+				F87F1FC62F52848E00308FB4 /* BFQRCodeViewController.m in Sources */,
 				F8792F8F2C587FA600D26F2D /* BFTabBarController.m in Sources */,
 				F87930802C5885E900D26F2D /* BFTinyPngManger.m in Sources */,
 				F8792F832C587F8200D26F2D /* BFSafeObjectManager.m in Sources */,

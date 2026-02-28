@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param scale 控制压缩速度 0～1
 - (NSData *)compressImageToSize:(NSInteger)toSize scale:(CGFloat)scale;
 
-
++ (UIImage *)generateQRCodeWithData:(NSString *)data size:(CGFloat)size logoImage:(UIImage *)logoImage ratio:(CGFloat)ratio;
 
 @end
 
