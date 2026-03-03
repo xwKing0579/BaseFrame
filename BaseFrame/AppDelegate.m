@@ -88,7 +88,7 @@
     // Override point for customization after application launch.
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
 
-    NSString *directory = @"/Users/wangxiangwei/Desktop/JieRan";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/RanJie";
 
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];

@@ -1,4 +1,18 @@
 {
+    "DBShareBookModel": "YGJOCrypticTomeContainer",
+    "DBShareConfig": "YGJOObscureSettingsBundle",
+    "DBSharePosterModel": "YGJOVeiledCanvasBlueprint",
+    "DBShareItemView": "YGJOHiddenModuleDisplay",
+    "DBSharePosterView": "YGJOCovertPosterVisual",
+    "DBChooseCashOrderModel": "YGJOMysteriousTransactionSchema",
+    "DBScrollPageModel": "YGJOFluidLeafStructure",
+    "DBSinglePageModel": "YGJOIsolatedSheetFramework",
+    "DBOnlineTTSManager": "YGJOVirtualSpeechController",
+    "DBOnlineVoicePanView": "YGJORemoteAudioPanelVisual",
+    "DBTextSplitter": "YGJOCharacterSegmentationEngine",
+    "DBTTSVoiceModel": "YGJOSyntheticToneProfile",
+
+    "DBKeychainManager":"YGJMattersResult",
     "DBUserVipConfig": "YGJPremiumUserConfiguration",
     "DBPayProductModel": "YGJPaymentProductFramework",
     "DBPayProductListModel": "YGJProductInventoryHandler",
