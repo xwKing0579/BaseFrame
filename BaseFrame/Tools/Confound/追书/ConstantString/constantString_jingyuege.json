@@ -60,7 +60,6 @@
     "DBAdSpaceBookcityTop": "bookstoreTopAdSpace",
     "DBAdSpaceActivityPageReward": "activityRewardAdSpace",
     "selfAdViewDidFinishReward": "nativeAdRewardCompletion",
-    
     "DBCombineType": "integrationPatternClassifier",
     "DBAdvertisingSwitch": "promotionalToggleController",
     "identifierCollectCell": "entityAggregationContainer",

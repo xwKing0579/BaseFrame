@@ -120,13 +120,14 @@
     
 //        [BFConfuseImage renameImageAssetsAndCodeReferencesInProject:directory renameMapping:BFConfuseImage.mapImageDict4];
     
-//        [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"YueGeJing"];
+//        [BFConfuseFile globalReplaceInDirectory:directory oldName:@"DBKit" newName:@"RanJie"];
     
 //        [BFConfuseProperty insertRandomPropertiesInDirectory:directory namePool:BFWordsRackTool.propertyNames averageCount:9];
     
       //插入随机方法
 //    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
     
+
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
