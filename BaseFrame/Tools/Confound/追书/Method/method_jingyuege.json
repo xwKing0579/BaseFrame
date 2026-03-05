@@ -1,4 +1,7 @@
 {
+    "startDoudiDomainTimer":"launchSoilTerrainClock",
+    "refreshDoudiDomain":"jRenewGroundRealmData",
+    "stopDoudiDomainTimer":"haltEarthZoneChronometer",
     "clickSkipAction": "progressionOmissionHandler",
     "checkAppBanbenAndMian": "applicationVersionComplianceChecker",
     "bookRouter": "literaryNavigationOrchestrator",

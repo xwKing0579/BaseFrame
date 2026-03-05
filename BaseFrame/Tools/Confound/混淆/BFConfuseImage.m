@@ -1362,4 +1362,246 @@
     NSLog(@"📊 总共重命名了 %lu 个文件", (unsigned long)renameCount);
 }
 
+
++ (void)correctImageNameInDirectory:(NSString *)directory {
+    // 检查目录是否存在
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    BOOL isDirectory = NO;
+    
+    if (![fileManager fileExistsAtPath:directory isDirectory:&isDirectory]) {
+        NSLog(@"错误：路径不存在: %@", directory);
+        return;
+    }
+    
+    if (!isDirectory) {
+        NSLog(@"错误：指定的路径不是目录: %@", directory);
+        return;
+    }
+    
+    // 检查是否为.xcassets目录
+    if (![directory hasSuffix:@".xcassets"]) {
+        NSLog(@"警告：路径不是以.xcassets结尾，但将继续处理");
+    }
+    
+    // 开始处理
+    [self processDirectory:directory];
+}
+
+#pragma mark - Private Class Methods
+
+/**
+ 处理指定目录
+ */
++ (void)processDirectory:(NSString *)directory {
+    NSLog(@"开始处理目录: %@", directory);
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *enumerator = [fileManager enumeratorAtPath:directory];
+    NSString *filePath;
+    NSInteger processedCount = 0;
+    
+    while ((filePath = [enumerator nextObject])) {
+        if ([filePath hasSuffix:@".imageset"]) {
+            NSString *fullPath = [directory stringByAppendingPathComponent:filePath];
+            if ([self processImageSet:fullPath]) {
+                processedCount++;
+            }
+        }
+    }
+    
+    NSLog(@"处理完成！共处理 %ld 个图片集", (long)processedCount);
+}
+
+/**
+ 处理单个.imageset文件夹
+ */
++ (BOOL)processImageSet:(NSString *)imageSetPath {
+    NSString *folderName = [[imageSetPath lastPathComponent] stringByDeletingPathExtension];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:imageSetPath error:nil];
+    
+    BOOL needsRenaming = NO;
+    
+    // 处理Contents.json文件
+    NSString *jsonPath = [imageSetPath stringByAppendingPathComponent:@"Contents.json"];
+    if ([fileManager fileExistsAtPath:jsonPath]) {
+        if ([self updateContentsJson:jsonPath withFolderName:folderName]) {
+            needsRenaming = YES;
+        }
+    }
+    
+    // 处理图片文件（1x, 2x, 3x）
+    for (NSString *item in contents) {
+        if ([self isImageFile:item]) {
+            NSString *oldImagePath = [imageSetPath stringByAppendingPathComponent:item];
+            NSString *newImageName = [self getNewImageName:item folderName:folderName];
+            
+            if (![item isEqualToString:newImageName]) {
+                NSString *newImagePath = [imageSetPath stringByAppendingPathComponent:newImageName];
+                if ([self renameFile:oldImagePath toPath:newImagePath]) {
+                    needsRenaming = YES;
+                }
+            }
+        }
+    }
+    
+    if (needsRenaming) {
+        NSLog(@"已处理: %@", folderName);
+    }
+    
+    return needsRenaming;
+}
+
+/**
+ 判断是否为图片文件
+ */
++ (BOOL)isImageFile:(NSString *)filename {
+    NSString *extension = [filename pathExtension].lowercaseString;
+    NSArray *imageExtensions = @[@"png", @"jpg", @"jpeg", @"gif", @"heic", @"webp"];
+    return [imageExtensions containsObject:extension];
+}
+
+/**
+ 更新Contents.json文件中的filename字段
+ */
++ (BOOL)updateContentsJson:(NSString *)jsonPath withFolderName:(NSString *)folderName {
+    NSError *error = nil;
+    NSData *jsonData = [NSData dataWithContentsOfFile:jsonPath];
+    if (!jsonData) {
+        NSLog(@"  无法读取Contents.json: %@", jsonPath);
+        return NO;
+    }
+    
+    NSMutableDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                                   options:NSJSONReadingMutableContainers
+                                                                     error:&error];
+    if (error || !jsonDict) {
+        NSLog(@"  解析Contents.json失败: %@", error.localizedDescription);
+        return NO;
+    }
+    
+    NSArray *images = jsonDict[@"images"];
+    if (![images isKindOfClass:[NSArray class]]) {
+        return NO;
+    }
+    
+    BOOL modified = NO;
+    NSMutableArray *updatedImages = [NSMutableArray array];
+    
+    for (NSDictionary *imageInfo in images) {
+        NSMutableDictionary *updatedImageInfo = [imageInfo mutableCopy];
+        NSString *filename = imageInfo[@"filename"];
+        
+        if (filename && [filename length] > 0) {
+            NSString *newFilename = [self getNewImageName:filename folderName:folderName];
+            if (![filename isEqualToString:newFilename]) {
+                updatedImageInfo[@"filename"] = newFilename;
+                modified = YES;
+            }
+        }
+        [updatedImages addObject:updatedImageInfo];
+    }
+    
+    if (modified) {
+        jsonDict[@"images"] = updatedImages;
+        
+        // 保持JSON格式美观
+        NSData *newJsonData = [NSJSONSerialization dataWithJSONObject:jsonDict
+                                                             options:NSJSONWritingPrettyPrinted
+                                                               error:&error];
+        if (!error && newJsonData) {
+            // 写入前先备份
+            NSString *backupPath = [jsonPath stringByAppendingString:@".backup"];
+            [jsonData writeToFile:backupPath atomically:YES];
+            
+            if ([newJsonData writeToFile:jsonPath atomically:YES]) {
+                // 删除备份文件
+                [[NSFileManager defaultManager] removeItemAtPath:backupPath error:nil];
+                NSLog(@"  更新Contents.json成功");
+                return YES;
+            } else {
+                // 写入失败，恢复备份
+                [[NSFileManager defaultManager] moveItemAtPath:backupPath toPath:jsonPath error:nil];
+                NSLog(@"  更新Contents.json失败");
+            }
+        }
+    }
+    
+    return NO;
+}
+
+/**
+ 根据文件夹名生成新的图片文件名
+ */
++ (NSString *)getNewImageName:(NSString *)oldName folderName:(NSString *)folderName {
+    // 获取原始文件的扩展名和后缀（如 @3x, @2x, @1x）
+    NSString *extension = [oldName pathExtension];
+    NSString *nameWithoutExtension = [oldName stringByDeletingPathExtension];
+    
+    // 检查是否包含倍图后缀
+    NSString *scaleSuffix = @"";
+    if ([nameWithoutExtension hasSuffix:@"@3x"]) {
+        scaleSuffix = @"@3x";
+    } else if ([nameWithoutExtension hasSuffix:@"@2x"]) {
+        scaleSuffix = @"@2x";
+    } else if ([nameWithoutExtension hasSuffix:@"@1x"]) {
+        scaleSuffix = @"@1x";
+    }
+    
+    // 清理文件夹名称中的非法字符
+    NSString *cleanFolderName = [self sanitizeFilename:folderName];
+    
+    // 构建新文件名
+    return [NSString stringWithFormat:@"%@%@.%@", cleanFolderName, scaleSuffix, extension];
+}
+
+/**
+ 清理文件名中的非法字符
+ */
++ (NSString *)sanitizeFilename:(NSString *)filename {
+    // 移除文件名中的非法字符
+    NSCharacterSet *illegalCharacters = [NSCharacterSet characterSetWithCharactersInString:@"/\\?%*|\"<>"];
+    NSArray *components = [filename componentsSeparatedByCharactersInSet:illegalCharacters];
+    return [components componentsJoinedByString:@""];
+}
+
+/**
+ 重命名文件
+ */
++ (BOOL)renameFile:(NSString *)oldPath toPath:(NSString *)newPath {
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
+    
+    // 检查源文件是否存在
+    if (![fileManager fileExistsAtPath:oldPath]) {
+        NSLog(@"  源文件不存在: %@", [oldPath lastPathComponent]);
+        return NO;
+    }
+    
+    // 如果目标文件已存在，比较内容是否相同
+    if ([fileManager fileExistsAtPath:newPath]) {
+        NSData *oldData = [NSData dataWithContentsOfFile:oldPath];
+        NSData *newData = [NSData dataWithContentsOfFile:newPath];
+        
+        if ([oldData isEqualToData:newData]) {
+            // 内容相同，直接删除源文件
+            [fileManager removeItemAtPath:oldPath error:nil];
+            NSLog(@"  文件内容相同，已删除: %@", [oldPath lastPathComponent]);
+            return YES;
+        } else {
+            // 内容不同，创建备份
+            NSString *backupPath = [newPath stringByAppendingString:@".backup"];
+            [fileManager moveItemAtPath:newPath toPath:backupPath error:nil];
+        }
+    }
+    
+    // 执行重命名
+    if ([fileManager moveItemAtPath:oldPath toPath:newPath error:&error]) {
+        NSLog(@"  重命名: %@ -> %@", [oldPath lastPathComponent], [newPath lastPathComponent]);
+        return YES;
+    } else {
+        NSLog(@"  重命名失败: %@, 错误: %@", [oldPath lastPathComponent], error.localizedDescription);
+        return NO;
+    }
+}
 @end

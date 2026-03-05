@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 //随机命名图片，不会需改项目中图片名
 + (void)renameAssetsInDirectory:(NSString *)directory;
 
+//校正图片名称
++ (void)correctImageNameInDirectory:(NSString *)directory;
+
 + (void)renameImageAssetsAndCodeReferencesInProject:(NSString *)projectDirectory
                                      renameMapping:(NSDictionary<NSString *, NSString *> *)renameMapping;
 
