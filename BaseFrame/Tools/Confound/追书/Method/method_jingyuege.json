@@ -325,7 +325,7 @@
     "openSlotAdSpaceType": "unlockStandardAdSlot",
     "openExpressAdsSpaceType": "launchCompactPromoSection",
     "openGridAdSpaceType": "initiateGridPromoLayout",
-    "initWithSelfAdModel": "configureWithNativePromoData",
+
     "mangoAdLoadSuccess": "externalCampaignLoadSuccess",
     "mangoAdLoadFailure": "thirdPartyContentFailure",
     "mangoAdObjectDidRemoved": "partnerAssetRemoved",

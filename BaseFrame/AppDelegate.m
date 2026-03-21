@@ -105,7 +105,7 @@
     
 //          [BFConfuseModel auditAndFixProjectAtPath:directory propertyMappings:BFConfuseModel.mapModelDict2 whitelistedPods:@[@"Pods"]]; //需要放在前面，因为是根据Model后缀判断数据模型的
     
-        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping3];
+//        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping3];
     
 //            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict4];
     
@@ -127,7 +127,7 @@
       //插入随机方法
 //    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
     
-
+    [BFConfuseMarker traverseDirectory:directory];
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];

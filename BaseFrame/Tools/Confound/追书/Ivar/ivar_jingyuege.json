@@ -172,7 +172,7 @@
     "lastList": "finalSelectionRegistry",
     "firstInstalTimeStamp": "initialInstallationMoment",
     "temp": "transientStateValue",
-    "message": "communicationPayload",
+ 
     "lastView": "finalVisualPerspective",
     "menuButton": "navigationControlWidget",
     "newModel": "updatedFrameworkInstance",
