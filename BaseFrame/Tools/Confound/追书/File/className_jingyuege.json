@@ -1,4 +1,13 @@
 {
+    "DBComicModel": "YGJCartoonDataStructure",
+    "DBNewUserPopupView": "YGJFreshMemberFloatingPanel",
+    "DBAdSpaceType": "YGJPromotionSlotClassification",
+    "DBBookShelfListViewController": "YGJLibraryCollectionNavigationHandler",
+    "DBSearchResultListViewController": "YGJQueryOutcomeDisplayCoordinator",
+    "DBReadCellModel": "YGJReadingContentUnitArchitecture",
+    "DBReadMenuPanView": "YGJLiteratureNavigationGestureContainer",
+    "DBReadMenuTableViewCell": "YGJBookInteractionOptionListingComponent",
+    
     "DBComicTypeSubListViewController": "YGJCategorySecondaryDisplayHandler",
     "DBComicTypesListViewController": "YGJGenreMasterOverviewController",
     "DBComicBooksIndexViewController": "YGJSeriesHomepageNavigator",
@@ -40,7 +49,7 @@
     "DBOnlineVoicePanView": "YGJORemoteAudioPanelVisual",
     "DBTextSplitter": "YGJOCharacterSegmentationEngine",
     "DBTTSVoiceModel": "YGJOSyntheticToneProfile",
-
+    
     "DBKeychainManager":"YGJMattersResult",
     "DBUserVipConfig": "YGJPremiumUserConfiguration",
     "DBPayProductModel": "YGJPaymentProductFramework",
