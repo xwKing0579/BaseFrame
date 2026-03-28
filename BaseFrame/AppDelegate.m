@@ -88,7 +88,7 @@
     // Override point for customization after application launch.
     [NSObject performTarget:BFString.bf_debug_tool.classString action:@"start"];
 
-    NSString *directory = @"/Users/wangxiangwei/Desktop/RanJie";
+    NSString *directory = @"/Users/wangxiangwei/Desktop/hun";
 
 //    NSString *directory = @"/Users/wangxiangwei/Desktop/test";
 //        [UIImage processProjectImagesAtPath:directory intensity:0.1];
@@ -127,7 +127,7 @@
       //插入随机方法
 //    [BFConfuseMethod injectRandomCodeToExistingMethodsInPath:directory];
     
-    [BFConfuseMarker traverseDirectory:directory];
+//    [BFConfuseMarker traverseDirectory:directory];
 //        [BFConfuseMarker deleteCommentsInDirectory:directory ignoreDirNames:@[@"Pods",@"LEEAlert"]];
     
 //        [BFConfuseMarker addCommentsToProjectAtPath:directory];
