@@ -107,7 +107,7 @@
     
 //        [BFConfuseFile replaceInDirectory:directory replaceDict:BFConfuseFile.fileMapping3];
     
-//            [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict4];
+//        [BFConfuseMethod safeReplaceContentInDirectory:directory excludeDirs:@[@"Pods"] renameMapping:BFConfuseMethod.mapMethodDict4];
     
 //        [BFConfuseProperty safeReplaceContentInDirectory:directory renameMapping:BFConfuseProperty.mapPropertyDict4];
     
