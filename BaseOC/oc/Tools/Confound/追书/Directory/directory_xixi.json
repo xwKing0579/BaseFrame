@@ -1,0 +1,30 @@
+
+{
+    "DBBaseModule": "XXFoundationCore",
+    "DBKitModule": "XXUtilityFramework",
+    "DBClassModule": "XXDynamicRuntime",
+    "DBNetworkModule": "XXWebServiceBridge",
+    "DBResetModule": "XXStateRestorer",
+    "DBSDKModule": "XXExternalIntegration",
+    "DBSqliteModule": "XXPersistentStore",
+    "DBTabBarModule": "XXInterfaceNavigator",
+    "ReadBookModule": "XXContentRenderer",
+    "SearchBooksModule": "XXDiscoveryInterface",
+    "BookDetailModule": "XXPublicationInspector",
+    "RankBooksModule": "XXPopularityRanker",
+    "AllBooksModule": "XXCollectionAggregator",
+    "LoginModule": "XXCredentialValidator",
+    "MyConfigModule": "XXPersonalizationHub",
+    "MyBooksModule": "XXPersonalArchive",
+    "DZNEmptyDataSetModule": "XXPlaceholderCanvas",
+    "JXPagerViewModule": "XXContentPager",
+    "CWLateralSlideModule": "XXNavigationDrawer",
+    "DBAlertViewModule": "XXNotificationPresenter",
+    "BookTypesModule": "XXTaxonomyBrowser",
+    "DBAdModule": "XXPromotionHandler",
+    "ReviewModule": "XXFeedbackAssessor",
+    "vc": "XXViewController",
+    "model": "XXDomainObject",
+    "view": "XXVisualComponent"
+}
+
