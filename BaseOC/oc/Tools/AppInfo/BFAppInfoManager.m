@@ -86,6 +86,17 @@ NSString *const kTPAppInfoUnknown = @"Unknown";
     if([platform isEqualToString:@"iPhone14,3"])return@"iPhone 13 Pro Max";
     if([platform isEqualToString:@"iPhone14,4"])return@"iPhone 13 Mini";
     if([platform isEqualToString:@"iPhone14,5"])return@"iPhone 13";
+    // iPhone 15 系列（2023年9月）
+    if ([platform isEqualToString:@"iPhone15,4"]) return @"iPhone 15";
+    if ([platform isEqualToString:@"iPhone15,5"]) return @"iPhone 15 Plus";
+    if ([platform isEqualToString:@"iPhone16,1"]) return @"iPhone 15 Pro";
+    if ([platform isEqualToString:@"iPhone16,2"]) return @"iPhone 15 Pro Max";
+
+    // iPhone 16 系列（2024年9月，如果已发布）
+    if ([platform isEqualToString:@"iPhone17,1"]) return @"iPhone 16 Pro";
+    if ([platform isEqualToString:@"iPhone17,2"]) return @"iPhone 16 Pro Max";
+    if ([platform isEqualToString:@"iPhone17,3"]) return @"iPhone 16";
+    if ([platform isEqualToString:@"iPhone17,4"]) return @"iPhone 16 Plus";
     
     //2022年3月9日，新款iPhone SE 三代发布
     if ([platform isEqualToString:@"iPhone14,6"]) return @"iPhone SE (3nd generation)";
@@ -132,7 +143,9 @@ NSString *const kTPAppInfoUnknown = @"Unknown";
     if([platform isEqualToString:@"iPad6,7"]) return@"iPad Pro 12.9";
     if([platform isEqualToString:@"iPad6,8"]) return@"iPad Pro 12.9";
 
-    if ([platform isEqualToString:@"i386"] || [platform isEqualToString:@"x86_64"] || [platform isEqualToString:@"arm64"]) return @"Simulator";
+#if TARGET_OS_SIMULATOR
+    return @"Simulator";
+#endif
     return kTPAppInfoUnknown;
 }
 
